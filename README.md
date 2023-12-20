@@ -5,7 +5,7 @@ MailScan is a cutting-edge Blazor Server application, tailored for optimizing ma
 
 Built with the latest .NET 8 framework, MailScan combines robust performance with a user-friendly interface, making it an essential tool for modern mail handling operations.
 
-[](doc/app.png)
+![](./doc/app.png)
 ## Features
 - **Envelope Scanning**: Utilizes device cameras to capture images of mail envelopes.
 - **Text Recognition**: Employs Optical Character Recognition (OCR) to extract recipient information from envelopes.
