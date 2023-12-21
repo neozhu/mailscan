@@ -15,28 +15,6 @@ public class MenuService : IMenuService
                 new() { Title = "Home", Icon = Icons.Material.Filled.Home, Href = "/" },
                 new()
                 {
-                    Title = "E-Commerce",
-                    Icon = Icons.Material.Filled.ShoppingCart,
-                    PageStatus = PageStatus.Completed,
-                    IsParent = true,
-                    MenuItems = new List<MenuSectionSubItemModel>
-                    {
-                        new()
-                        {
-                            Title = "Products",
-                            Href = "/pages/products",
-                            PageStatus = PageStatus.Completed
-                        },
-                        new()
-                        {
-                            Title = "Documents",
-                            Href = "/pages/documents",
-                            PageStatus = PageStatus.Completed
-                        }
-                    }
-                },
-                new()
-                {
                     Title = "Analytics",
                     Roles = new[] { RoleName.Admin, RoleName.Users },
                     Icon = Icons.Material.Filled.Analytics,

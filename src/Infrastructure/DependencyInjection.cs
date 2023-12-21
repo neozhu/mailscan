@@ -15,7 +15,6 @@ using CleanArchitecture.Blazor.Infrastructure.Constants.User;
 using CleanArchitecture.Blazor.Infrastructure.Persistence.Interceptors;
 using CleanArchitecture.Blazor.Infrastructure.Services.JWT;
 using CleanArchitecture.Blazor.Infrastructure.Services.MultiTenant;
-using CleanArchitecture.Blazor.Infrastructure.Services.PaddleOCR;
 using CleanArchitecture.Blazor.Infrastructure.Services.Serialization;
 using FluentEmail.MailKitSmtp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -181,8 +180,8 @@ public static class DependencyInjection
             .AddScoped<IDateTime, DateTimeService>()
             .AddScoped<IExcelService, ExcelService>()
             .AddScoped<IUploadService, UploadService>()
-            .AddScoped<IPDFService, PDFService>()
-            .AddTransient<IDocumentOcrJob, DocumentOcrJob>();
+            .AddScoped<IPDFService, PDFService>();
+
     }
 
     private static IServiceCollection AddMessageServices(this IServiceCollection services,
