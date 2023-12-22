@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Data;
 using CleanArchitecture.Blazor.Infrastructure.Configurations;
 using CleanArchitecture.Blazor.Infrastructure.Constants.Database;
@@ -145,19 +145,16 @@ public static class SerilogExtensions
         //Column type is writer's constructor parameter
         IDictionary<string, ColumnWriterBase> columnOptions = new Dictionary<string, ColumnWriterBase>
         {
-            { "Message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
-            { "MessageTemplate", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
-            { "Level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
-            { "TimeStamp", new TimestampColumnWriter(NpgsqlDbType.Timestamp) },
-            { "Exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
-            { "Properties", new PropertiesColumnWriter(NpgsqlDbType.Varchar) },
-            { "LogEvent", new LogEventSerializedColumnWriter(NpgsqlDbType.Varchar) },
-            { "UserName", new SinglePropertyColumnWriter("UserName", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar) },
-            { "ClientIP", new SinglePropertyColumnWriter("ClientIp", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar) },
-            {
-                "ClientAgent",
-                new SinglePropertyColumnWriter("ClientAgent", PropertyWriteMethod.ToString, NpgsqlDbType.Varchar)
-            }
+            { "message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
+            { "message_template", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
+            { "level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
+            { "time_stamp", new TimestampColumnWriter(NpgsqlDbType.Timestamp) },
+            { "exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
+            { "properties", new PropertiesColumnWriter(NpgsqlDbType.Varchar) },
+            { "log_event", new LogEventSerializedColumnWriter(NpgsqlDbType.Varchar) },
+            { "user_name", new SinglePropertyColumnWriter("UserName", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar) },
+            { "client_ip", new SinglePropertyColumnWriter("ClientIp", PropertyWriteMethod.Raw, NpgsqlDbType.Varchar) },
+            { "client_agent",new SinglePropertyColumnWriter("ClientAgent", PropertyWriteMethod.ToString, NpgsqlDbType.Varchar) }
         };
         serilogConfig.WriteTo.Async(wt => wt.PostgreSQL(
             connectionString,

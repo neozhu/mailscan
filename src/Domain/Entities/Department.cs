@@ -9,9 +9,11 @@ using CleanArchitecture.Blazor.Domain.Common.Entities;
 
 namespace CleanArchitecture.Blazor.Domain.Entities;
 
-public class Customer : BaseAuditableEntity
+public class Department : BaseAuditableEntity
 {
-    public string? Name { get; set; }
+    public required string Name { get; set; }
+    public string? Address { get; set; }
+    public string? Keywords { get; set; }
     public string? Description { get; set; }
 
 
