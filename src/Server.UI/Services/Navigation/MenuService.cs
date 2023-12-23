@@ -17,7 +17,7 @@ public class MenuService : IMenuService
                 {
                     Title = "Department",
                     Roles = new[] { RoleName.Admin, RoleName.Users },
-                    Icon = Icons.Material.Filled.AccountBalance,
+                    Icon = Icons.Material.Filled.SwitchAccount,
                     Href = "/pages/departments",
                     PageStatus = PageStatus.Completed
                 },
@@ -34,7 +34,7 @@ public class MenuService : IMenuService
                     Title = "Scan Histories",
                     Roles = new[] { RoleName.Admin, RoleName.Users },
                     Icon = Icons.Material.Filled.QrCodeScanner,
-                    Href = "/pages/canhistories",
+                    Href = "/pages/scanhistories",
                     PageStatus = PageStatus.Completed
                 }
             }

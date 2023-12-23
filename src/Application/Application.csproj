@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <RootNamespace>CleanArchitecture.Blazor.Application</RootNamespace>
@@ -8,6 +8,7 @@
         <LangVersion>default</LangVersion>
     </PropertyGroup>
     <ItemGroup>
+      <PackageReference Include="ZiggyCreatures.FusionCache" Version="0.24.0" />
         <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
         <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
         <PackageReference Include="ClosedXML" Version="0.104.0-preview2" />
@@ -16,8 +17,8 @@
         <PackageReference Include="jcamp.FluentEmail.Razor" Version="3.7.0" />
         <PackageReference Include="AutoMapper" Version="12.0.1" />
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-        <PackageReference Include="FluentValidation" Version="11.8.1" />
-        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.8.1" />
+        <PackageReference Include="FluentValidation" Version="11.9.0" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
         <PackageReference Include="LazyCache" Version="2.4.0" />
         <PackageReference Include="LazyCache.AspNetCore" Version="2.4.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />

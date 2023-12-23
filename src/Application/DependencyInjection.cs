@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using CleanArchitecture.Blazor.Application.Common.PublishStrategies;
+using CleanArchitecture.Blazor.Application.DataServices;
 using CleanArchitecture.Blazor.Application.Pipeline;
 using CleanArchitecture.Blazor.Application.Pipeline.PreProcessors;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,7 +29,12 @@ public static class DependencyInjection
         });
 
         services.AddLazyCache();
-
+        services.AddSingleton<DepartmentService>();
+        services.AddSingleton<IDepartmentService>(sp => {
+            var service = sp.GetRequiredService<DepartmentService>();
+            service.Initialize();
+            return service;
+        });
         return services;
     }
 

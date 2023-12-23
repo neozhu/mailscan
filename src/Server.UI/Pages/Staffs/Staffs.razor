@@ -1,6 +1,7 @@
 ﻿@page "/pages/Staffs"
 
 @using BlazorDownloadFile
+@using CleanArchitecture.Blazor.Application.DataServices
 @using CleanArchitecture.Blazor.Application.Features.Staffs.Caching
 @using CleanArchitecture.Blazor.Application.Features.Staffs.DTOs
 @using CleanArchitecture.Blazor.Application.Features.Staffs.Specifications
@@ -20,6 +21,7 @@
         height: 120px !important;
     }
 </style>
+@departmentService.DataSource.Count
 
 <MudDataGrid ServerData="@(ServerReload)"
                   FixedHeader="true"
@@ -220,6 +222,8 @@
     [Inject]
     private IMediator Mediator { get; set; } = default!;
     [Inject]
+    private IDepartmentService departmentService { get; set; } = default!;
+    [Inject]
     private IMapper Mapper { get; set; } = default!;
     [CascadingParameter]
     private Task<AuthenticationState> AuthState { get; set; } = default!;
@@ -244,6 +248,7 @@
         _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Staffs.Delete)).Succeeded;
         _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.Staffs.Import)).Succeeded;
         _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Staffs.Export)).Succeeded;
+         
     }
     private async Task<GridData<StaffDto>> ServerReload(GridState<StaffDto> state)
     {
