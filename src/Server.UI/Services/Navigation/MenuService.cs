@@ -15,27 +15,27 @@ public class MenuService : IMenuService
                 new() { Title = "Home", Icon = Icons.Material.Filled.Home, Href = "/" },
                 new()
                 {
-                    Title = "Analytics",
+                    Title = "Department",
                     Roles = new[] { RoleName.Admin, RoleName.Users },
-                    Icon = Icons.Material.Filled.Analytics,
-                    Href = "/analytics",
-                    PageStatus = PageStatus.ComingSoon
+                    Icon = Icons.Material.Filled.AccountBalance,
+                    Href = "/pages/departments",
+                    PageStatus = PageStatus.Completed
                 },
                 new()
                 {
-                    Title = "Banking",
+                    Title = "Staff",
                     Roles = new[] { RoleName.Admin, RoleName.Users },
-                    Icon = Icons.Material.Filled.Money,
-                    Href = "/banking",
-                    PageStatus = PageStatus.ComingSoon
+                    Icon = Icons.Material.Filled.ContactMail,
+                    Href = "/pages/staffs",
+                    PageStatus = PageStatus.Completed
                 },
                 new()
                 {
-                    Title = "Booking",
+                    Title = "Scan Histories",
                     Roles = new[] { RoleName.Admin, RoleName.Users },
-                    Icon = Icons.Material.Filled.CalendarToday,
-                    Href = "/booking",
-                    PageStatus = PageStatus.ComingSoon
+                    Icon = Icons.Material.Filled.QrCodeScanner,
+                    Href = "/pages/canhistories",
+                    PageStatus = PageStatus.Completed
                 }
             }
         },

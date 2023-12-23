@@ -18,7 +18,9 @@ public class ScanHistory : BaseAuditableEntity
     public string? LastName { get; set; }
     public string? Address { get; set; }
     public decimal? ElapsedTime { get; set; }
+    public string? Operator { get; set; }
     public DateTime ScanDateTime { get; set; } = DateTime.Now;
+    public string? Comments { get; set; }
 
 
 }

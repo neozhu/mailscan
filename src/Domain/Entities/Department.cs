@@ -16,5 +16,5 @@ public class Department : BaseAuditableEntity
     public string? Keywords { get; set; }
     public string? Description { get; set; }
 
-
+    public ICollection<Staff>? Staffs { get; set; }
 }

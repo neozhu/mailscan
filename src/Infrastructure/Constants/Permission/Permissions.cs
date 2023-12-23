@@ -27,57 +27,42 @@ public static class Permissions
     }
 
 
-    [DisplayName("Products")]
-    [Description("Products Permissions")]
-    public static class Products
+    [DisplayName("Departments")]
+    [Description("Departments Permissions")]
+    public static class Departments
     {
-        public const string View = "Permissions.Products.View";
-        public const string Create = "Permissions.Products.Create";
-        public const string Edit = "Permissions.Products.Edit";
-        public const string Delete = "Permissions.Products.Delete";
-        public const string Search = "Permissions.Products.Search";
-        public const string Export = "Permissions.Products.Export";
-        public const string Import = "Permissions.Products.Import";
+        public const string View = "Permissions.Departments.View";
+        public const string Create = "Permissions.Departments.Create";
+        public const string Edit = "Permissions.Departments.Edit";
+        public const string Delete = "Permissions.Departments.Delete";
+        public const string Search = "Permissions.Departments.Search";
+        public const string Export = "Permissions.Departments.Export";
+        public const string Import = "Permissions.Departments.Import";
     }
-    [DisplayName("Customers")]
-    [Description("Customers Permissions")]
-    public static class Customers
+    [DisplayName("Staffs")]
+    [Description("Staffs Permissions")]
+    public static class Staffs
     {
-        public const string View = "Permissions.Customers.View";
-        public const string Create = "Permissions.Customers.Create";
-        public const string Edit = "Permissions.Customers.Edit";
-        public const string Delete = "Permissions.Customers.Delete";
-        public const string Search = "Permissions.Customers.Search";
-        public const string Export = "Permissions.Customers.Export";
-        public const string Import = "Permissions.Customers.Import";
-    }
-
-    [DisplayName("Categories")]
-    [Description("Categories Permissions")]
-    public static class Categories
-    {
-        public const string View = "Permissions.Categories.View";
-        public const string Create = "Permissions.Categories.Create";
-        public const string Edit = "Permissions.Categories.Edit";
-        public const string Delete = "Permissions.Categories.Delete";
-        public const string Search = "Permissions.Categories.Search";
-        public const string Export = "Permissions.Categories.Export";
-        public const string Import = "Permissions.Categories.Import";
+        public const string View = "Permissions.Staffs.View";
+        public const string Create = "Permissions.Staffs.Create";
+        public const string Edit = "Permissions.Staffs.Edit";
+        public const string Delete = "Permissions.Staffs.Delete";
+        public const string Search = "Permissions.Staffs.Search";
+        public const string Export = "Permissions.Staffs.Export";
+        public const string Import = "Permissions.Staffs.Import";
     }
 
-    [DisplayName("Documents")]
-    [Description("Documents Permissions")]
-    public static class Documents
+    [DisplayName("ScanHistories")]
+    [Description("ScanHistories Permissions")]
+    public static class ScanHistories
     {
-        public const string View = "Permissions.Documents.View";
-        public const string Create = "Permissions.Documents.Create";
-        public const string Edit = "Permissions.Documents.Edit";
-        public const string Delete = "Permissions.Documents.Delete";
-        public const string Search = "Permissions.Documents.Search";
-        public const string Export = "Permissions.Documents.Export";
-        public const string Import = "Permissions.Documents.Import";
-        public const string Download = "Permissions.Documents.Download";
+        public const string View = "Permissions.ScanHistories.View";
+        public const string Delete = "Permissions.ScanHistories.Delete";
+        public const string Export = "Permissions.ScanHistories.Export";
+
     }
+
+     
     [DisplayName("Dictionaries")]
     [Description("Dictionaries Permissions")]
     public static class Dictionaries
@@ -142,8 +127,6 @@ public static class Permissions
         public const string Delete = "Permissions.RoleClaims.Delete";
         public const string Search = "Permissions.RoleClaims.Search";
     }
-
-
 
     [DisplayName("Dashboards")]
     [Description("Dashboards Permissions")]

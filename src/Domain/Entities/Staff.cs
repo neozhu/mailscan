@@ -11,8 +11,10 @@ namespace CleanArchitecture.Blazor.Domain.Entities;
 
 public class Staff : BaseAuditableEntity
 {
-    public string LastName { get; set; }
+    public required string LastName { get; set; }
     public string? FirstName { get; set; }
+    public string? EmailAddress { get; set; }
+    public string? PhoneNumber { get; set; }
     public string? Tag { get; set; }
     public int? DepartmentId { get; set; }
     public virtual Department? Department { get; set; }
