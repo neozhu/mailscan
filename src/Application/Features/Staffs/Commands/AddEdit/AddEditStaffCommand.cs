@@ -19,7 +19,7 @@ public class AddEditStaffCommand : ICacheInvalidatorRequest<Result<int>>
     public string? PhoneNumber { get; set; }
     [Description("Tag")]
     public string? Tag { get; set; }
-    [Description("Department Id")]
+    [Description("Department")]
     public int? DepartmentId { get; set; }
 
 

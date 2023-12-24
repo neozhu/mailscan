@@ -12,6 +12,7 @@ using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using Serilog.Sinks.PostgreSQL;
 using Serilog.Sinks.PostgreSQL.ColumnWriters;
+
 using ColumnOptions = Serilog.Sinks.MSSqlServer.ColumnOptions;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Extensions;
@@ -170,13 +171,13 @@ public static class SerilogExtensions
     private static void WriteToSqLite(LoggerConfiguration serilogConfig, string? connectionString)
     {
         if (string.IsNullOrEmpty(connectionString)) return;
-
+        var sqlPath = Environment.CurrentDirectory + @"/mailscan.db";
         const string tableName = "Loggers";
         serilogConfig.WriteTo.Async(wt => wt.SQLite(
-            connectionString,
+            sqlPath,
             tableName,
             LogEventLevel.Information
-        ));
+        ).CreateLogger());
     }
 
 

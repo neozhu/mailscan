@@ -25,12 +25,12 @@ public class DepartmentService : IDepartmentService
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        DataSource = await _cache.GetOrSetAsync(DepartmentCacheKey.GetAllCacheKey, new List<DepartmentDto>(), _ => _context.Departments.OrderBy(x => x.Name).ProjectTo<DepartmentDto>(_mapper.ConfigurationProvider).ToListAsync(cancellationToken), token: cancellationToken).ConfigureAwait(false);
+        DataSource = await _cache.GetOrSetAsync(DepartmentCacheKey.GetAllCacheKey, _ => _context.Departments.OrderBy(x => x.Name).ProjectTo<DepartmentDto>(_mapper.ConfigurationProvider).ToListAsync(cancellationToken), token: cancellationToken).ConfigureAwait(false);
     }
 
     public void Initialize()
     {
-        DataSource = _cache.GetOrSet(DepartmentCacheKey.GetAllCacheKey, new List<DepartmentDto>(),
+        DataSource = _cache.GetOrSet(DepartmentCacheKey.GetAllCacheKey, 
              _ => _context.Departments.OrderBy(x => x.Name)
                 .ProjectTo<DepartmentDto>(_mapper.ConfigurationProvider)
                 .ToList());
@@ -39,6 +39,6 @@ public class DepartmentService : IDepartmentService
     public async Task Refresh(CancellationToken cancellationToken = default)
     {
         _cache.Remove(DepartmentCacheKey.GetAllCacheKey, null, cancellationToken);
-        DataSource = await _cache.GetOrSetAsync(DepartmentCacheKey.GetAllCacheKey, new List<DepartmentDto>(), _ => _context.Departments.OrderBy(x => x.Name).ProjectTo<DepartmentDto>(_mapper.ConfigurationProvider).ToListAsync(cancellationToken), token: cancellationToken).ConfigureAwait(false);
+        DataSource = await _cache.GetOrSetAsync(DepartmentCacheKey.GetAllCacheKey, _ => _context.Departments.OrderBy(x => x.Name).ProjectTo<DepartmentDto>(_mapper.ConfigurationProvider).ToListAsync(cancellationToken), token: cancellationToken).ConfigureAwait(false);
     }
 }

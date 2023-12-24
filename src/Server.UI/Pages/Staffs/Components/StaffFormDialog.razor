@@ -1,21 +1,30 @@
 ﻿@using CleanArchitecture.Blazor.Application.Features.Staffs.Commands.AddEdit
-
+@using CleanArchitecture.Blazor.Application.DataServices
 @inherits MudComponentBase
 @inject IValidationService Validator
 @inject IStringLocalizer<Staffs> L
-
+@implements IDisposable
 <MudDialog>
     <DialogContent>
         <MudForm Model="@model" @ref="@_form" Validation="@(Validator.ValidateValue(model))">
             <MudGrid>
                 <MudItem xs="12" md="6">
-                    <MudNumericField Label="@L[model.GetMemberDescription(x=>x.DepartmentId)]" @bind-Value="model.DepartmentId" For="@(() => model.DepartmentId)" Min="0" Required="false" RequiredError="@L["department id is required!"]"></MudNumericField>
+                    <MudSelect For="@(() => model.DepartmentId)"
+                               Label="@L[model.GetMemberDescription(x=>x.DepartmentId)]"
+                               Required="true"
+                               RequiredError="@L["department is required."]"
+                               @bind-Value="@model.DepartmentId">
+                        @foreach (var item in departmentService.DataSource)
+                        {
+                            <MudSelectItem T="int?" Value="@item.Id">@($"{item.Name} | {item.Address}")</MudSelectItem>
+                        }
+                    </MudSelect>
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudTextField Label="@L[model.GetMemberDescription(x=>x.Tag)]" @bind-Value="model.Tag" For="@(() => model.Tag)" Required="false" RequiredError="@L["tag is required!"]"></MudTextField>
                 </MudItem>
                 <MudItem xs="12" md="6">
-                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.LastName)]" @bind-Value="model.LastName" For="@(() => model.LastName)" Required="false" RequiredError="@L["last name is required!"]"></MudTextField>
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.LastName)]" @bind-Value="model.LastName" For="@(() => model.LastName)" Required="true" RequiredError="@L["last name is required!"]"></MudTextField>
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudTextField Label="@L[model.GetMemberDescription(x=>x.FirstName)]" @bind-Value="model.FirstName" For="@(() => model.FirstName)" Required="false" RequiredError="@L["first name is required!"]"></MudTextField>
@@ -45,6 +54,16 @@
     AddEditStaffCommandValidator _modelValidator = new();
     [EditorRequired][Parameter] public AddEditStaffCommand model { get; set; } = null!;
     [Inject] private IMediator _mediator { get; set; } = default!;
+    [Inject]
+    private IDepartmentService departmentService { get; set; } = default!;
+    protected override void OnInitialized()
+    {
+       departmentService.OnChange += StateHasChanged;
+    }
+    public void Dispose()
+    {
+        departmentService.OnChange -= StateHasChanged;
+    }
     async Task Submit()
     {
         try

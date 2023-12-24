@@ -28,7 +28,7 @@ public class StaffDto
     {
         public Mapping()
         {
-            CreateMap<Staff, StaffDto>().ForMember(x=>x.DepartmentName,y=>y.MapFrom(x=>x.Department.Name));
+            CreateMap<Staff, StaffDto>().ForMember(x=>x.DepartmentName,y=>y.MapFrom(x=>$"{x.Department.Name} | {x.Department.Address}"));
         }
     }
 }
