@@ -34,4 +34,5 @@ EXPOSE 8000
 ENV UVICORN_LOG_LEVEL=debug
 
 # Define the command to run on container start
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["uvicorn"]
+CMD ["main:app", "--host", "0.0.0.0", "--port", "8000", "--log-level", "${UVICORN_LOG_LEVEL}"]
