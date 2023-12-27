@@ -5,12 +5,14 @@ import pytesseract
 from PIL import Image
 import spacy
 import io
+import time
 
 app = FastAPI()
 
 def extract_text_and_entities(img, ocr_language='eng', spacy_model='en_core_web_sm') -> dict:
     # pytesseract.pytesseract.tesseract_cmd = r'C:\Users\neo_z\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
     # Perform OCR recognition using Tesseract
+    start = time.time()
     recognized_text = pytesseract.image_to_string(img, lang=ocr_language)
 
     # Load the spaCy model
@@ -18,7 +20,8 @@ def extract_text_and_entities(img, ocr_language='eng', spacy_model='en_core_web_
 
     # Process the recognized text using spaCy
     doc = nlp(recognized_text)
-
+    
+    elapsed_time = time.time() - start
     # Group entities by label
     entities = {}
     for ent in doc.ents:
@@ -26,7 +29,10 @@ def extract_text_and_entities(img, ocr_language='eng', spacy_model='en_core_web_
             entities[ent.label_] = []
         entities[ent.label_].append(ent.text)
 
-    return entities
+    # Add processing time to the result
+    result = {'entities': entities, 'processing_time': elapsed_time}
+
+    return result
 
 @app.post("/process/")
 async def process(file: UploadFile = File(...), accept_language: Optional[str] = Header(None)):
