@@ -3,7 +3,7 @@
 @inject IJSRuntime JS
 <MudCard Style="width:358px">
     <div class="mud-card-media video-container" style="position: relative;width:358px;height:280px">
-        <video id="video" @ref=VideoElement autoplay style="width:358px;height:273px">
+        <video id="video" @ref=VideoElement autoplay playsinline style="width:358px;height:273px">
             @if (errorMessage is not null)
             {
                 <div class="alert alert-danger">
@@ -21,7 +21,7 @@
         }
     </div>
     <MudCardActions Class="justify-space-between">
-        <MudButton Variant="Variant.Filled" Disabled="@(!isCameraStreaming)" OnClick="Scan" Color="Color.Primary">Scan</MudButton>
+        <MudLoadingButton Loading="@processing" Variant="Variant.Filled" Disabled="@(!isCameraStreaming)" OnClick="Scan" Color="Color.Primary">Scan</MudLoadingButton>
     </MudCardActions>
     <MudCardContent>
         <code>@result</code>
@@ -63,7 +63,6 @@
     {
         var stream = saveBase64Image(data);
         result =await _ocrService.Process(stream);
-
         processing = false;
         StateHasChanged();
     }

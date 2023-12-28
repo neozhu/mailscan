@@ -12,7 +12,22 @@ const constraints = (window.constraints = {
 export async function getCameraFeed(videoElement, dotnet) {
     console.log("initializing camera", dotnet);
     try {
-        let stream = await navigator.mediaDevices.getUserMedia(constraints);
+        let devices = await navigator.mediaDevices.enumerateDevices();
+        let cameras = devices.filter(device => device.kind === 'videoinput');
+        let cameraId;
+        console.log("cameras: ", cameras.length);
+        if (cameras.length > 1) {
+            cameraId = cameras[cameras.length - 1].deviceId
+        }
+        let stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment',
+                deviceId: { exact: cameraId },
+                width: 1280,
+                height: 720,
+            },
+            audio: false
+        });
         handleSuccess(stream, videoElement);
         dotnet.invokeMethodAsync("OnCameraStreaming");
     } catch (error) {
