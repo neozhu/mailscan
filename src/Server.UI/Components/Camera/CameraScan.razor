@@ -1,0 +1,39 @@
+﻿@using Services.JsInterop
+@inject IJSRuntime JS
+<MudCard Style="width:358px">
+    <div class="mud-card-media video-container" style="position: relative;width:358px;height:280px">
+        <video id="video" @ref=VideoElement autoplay style="width:358px;height:280px">
+            @if (errorMessage is not null)
+            {
+                <div class="alert alert-danger">
+                    @errorMessage
+                </div>
+            }
+        </video>
+        @if (processing)
+        {
+            <div class="blur-overlay" style="position: absolute; top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(10px);"></div>
+        }
+    </div>
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled" OnClick="@(()=>processing=!processing)" Color="Color.Primary">Scan</MudButton>
+ 
+    </MudCardActions>
+</MudCard>
+
+@code {
+    private ElementReference VideoElement;
+    private string? errorMessage;
+    private bool processing = false;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await new CameraScanJS(JS).Init(VideoElement, DotNetObjectReference.Create(this));
+        }
+    }
+}
