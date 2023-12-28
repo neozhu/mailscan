@@ -13,7 +13,6 @@ using CleanArchitecture.Blazor.Server.UI.Services.Notifications;
 using CleanArchitecture.Blazor.Server.UI.Services.UserPreferences;
 using Hangfire;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.Extensions.FileProviders;
 using MudBlazor.Services;
 using MudExtensions.Services;
@@ -27,6 +26,9 @@ public static class DependencyInjection
     public static IServiceCollection AddServerUI(this IServiceCollection services, IConfiguration config)
     {
         services.AddRazorComponents().AddInteractiveServerComponents();
+        services.AddServerSideBlazor().AddHubOptions(options => {
+            options.MaximumReceiveMessageSize = 1024 *1024* 50;
+        });
         services.AddCascadingAuthenticationState();
         services.AddMudBlazorDialog()
             .AddMudServices(config =>
@@ -47,9 +49,9 @@ public static class DependencyInjection
             options.UseReduxDevTools();
         });
 
-        services.AddHttpClient("ocr", c =>
+        services.AddHttpClient("BackendApiClient", c =>
         {
-            c.BaseAddress = new Uri("https://paddleocr.blazorserver.com/uploadocr");
+            c.BaseAddress = new Uri(config["BackendApiUrl"]);
             c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("multipart/form-data"));
         }).AddTransientHttpErrorPolicy(policy => policy.WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(30)));
 
@@ -61,7 +63,8 @@ public static class DependencyInjection
             .AddBlazorDownloadFile()
             .AddScoped<IUserPreferencesService, UserPreferencesService>()
             .AddScoped<IMenuService, MenuService>()
-            .AddScoped<INotificationService, InMemoryNotificationService>();
+            .AddScoped<INotificationService, InMemoryNotificationService>()
+            .AddScoped<OCRService>();
 
         return services;
     }

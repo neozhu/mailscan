@@ -1,8 +1,9 @@
 ﻿@using Services.JsInterop
+@using Services
 @inject IJSRuntime JS
 <MudCard Style="width:358px">
     <div class="mud-card-media video-container" style="position: relative;width:358px;height:280px">
-        <video id="video" @ref=VideoElement autoplay style="width:358px;height:280px">
+        <video id="video" @ref=VideoElement autoplay style="width:358px;height:273px">
             @if (errorMessage is not null)
             {
                 <div class="alert alert-danger">
@@ -19,21 +20,63 @@
     backdrop-filter: blur(10px);"></div>
         }
     </div>
-    <MudCardActions>
-        <MudButton Variant="Variant.Filled" OnClick="@(()=>processing=!processing)" Color="Color.Primary">Scan</MudButton>
- 
+    <MudCardActions Class="justify-space-between">
+        <MudButton Variant="Variant.Filled" Disabled="@(!isCameraStreaming)" OnClick="Scan" Color="Color.Primary">Scan</MudButton>
     </MudCardActions>
+    <MudCardContent>
+        <code>@result</code>
+</MudCardContent>
 </MudCard>
 
 @code {
     private ElementReference VideoElement;
     private string? errorMessage;
     private bool processing = false;
+    private bool isCameraStreaming;
+    private string imageDataURL;
+    private string result;
+    private DotNetObjectReference<CameraScan>? objRef;
+    [Inject]
+    private OCRService _ocrService { get; set; } = null!;
+
+
+    protected override void OnInitialized()
+    {
+        objRef = DotNetObjectReference.Create(this);
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await new CameraScanJS(JS).Init(VideoElement, DotNetObjectReference.Create(this));
+            await new CameraScanJS(JS).Init(VideoElement, objRef);
         }
+    }
+    [JSInvokable]
+    public void OnCameraStreaming()
+    {
+        isCameraStreaming = true;
+        StateHasChanged();
+    }
+    [JSInvokable]
+    public async void OnCaptureCallback(string data)
+    {
+        var stream = saveBase64Image(data);
+        result =await _ocrService.Process(stream);
+
+        processing = false;
+        StateHasChanged();
+    }
+    private MemoryStream saveBase64Image(string base64Image)
+    {
+        string base64Data = base64Image.Substring(base64Image.IndexOf(',') + 1);
+        byte[] imageBytes = Convert.FromBase64String(base64Data);
+        return new MemoryStream(imageBytes);
+    }
+    private async Task Scan()
+    {
+        result = "";
+        processing = true;
+        await new CameraScanJS(JS).Capture(VideoElement,objRef);
     }
 }

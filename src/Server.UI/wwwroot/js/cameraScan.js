@@ -2,15 +2,15 @@ const constraints = (window.constraints = {
     audio: false,
     video: {
         // 指定分辨率
-        width: 640,
-        height: 480,
+        width: 1280,
+        height: 720,
         // 指定刷新率
         frameRate: 30,
     },
 
 });
 export async function getCameraFeed(videoElement, dotnet) {
-    console.log("initializing camera");
+    console.log("initializing camera", dotnet);
     try {
         let stream = await navigator.mediaDevices.getUserMedia(constraints);
         handleSuccess(stream, videoElement);
@@ -42,4 +42,17 @@ function errorMsg(msg, error, dotnet) {
         console.error(error);
     }
     dotnet.invokeMethodAsync("OnCameraStreamingError", msg);
+}
+
+export async function capture(videoElement, dotnet) {
+    const canvasElement = document.createElement('canvas');
+    const context = canvasElement.getContext('2d');
+    canvasElement.width = videoElement.videoWidth;
+    canvasElement.height = videoElement.videoHeight;
+    context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+    // 获取图片数据
+    const imageDataURL = canvasElement.toDataURL('image/png');
+    // 这里可以将 imageDataURL 保存或发送到服务器
+    //console.log(dotnet, imageDataURL)
+    dotnet.invokeMethodAsync("OnCaptureCallback", imageDataURL);
 }

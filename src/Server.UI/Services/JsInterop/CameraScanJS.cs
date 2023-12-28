@@ -11,9 +11,15 @@ public partial class CameraScanJS
     {
         _jsRuntime = jsRuntime;
     }
-    public async Task<ValueTask> Init(ElementReference videoElment, DotNetObjectReference<CameraScan> dotNetObject)
+    public async Task<ValueTask> Init(ElementReference videoElment, DotNetObjectReference<CameraScan>? dotNetObject)
     {
         var jsmodule = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/cameraScan.js");
         return jsmodule.InvokeVoidAsync("getCameraFeed", videoElment, dotNetObject);
     }
+    public async Task<ValueTask> Capture(ElementReference videoElment,DotNetObjectReference<CameraScan>? dotNetObject)
+    {
+        var jsmodule = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/cameraScan.js");
+        return jsmodule.InvokeVoidAsync("capture", videoElment, dotNetObject);
+    }
+
 }
