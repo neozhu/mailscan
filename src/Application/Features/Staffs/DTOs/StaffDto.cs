@@ -22,13 +22,18 @@ public class StaffDto
     public int? DepartmentId { get; set; }
     [Description("Department Name")]
     public string? DepartmentName { get; set; }
+    [Description("Department Address")]
+    public string? DepartmentAddress { get; set; }
 
 
     private class Mapping : Profile
     {
         public Mapping()
         {
-            CreateMap<Staff, StaffDto>().ForMember(x=>x.DepartmentName,y=>y.MapFrom(x=>$"{x.Department.Name} | {x.Department.Address}"));
+            CreateMap<Staff, StaffDto>().ForMember(x=>x.DepartmentName,y=>y.MapFrom(x=>$"{x.Department.Name}"))
+                .ForMember(x => x.DepartmentAddress, y => y.MapFrom(x => $"{x.Department.Address}"));
+
+            CreateMap<StaffDto, Staff>(MemberList.None);
         }
     }
 }

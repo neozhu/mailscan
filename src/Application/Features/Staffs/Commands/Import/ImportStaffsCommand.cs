@@ -52,28 +52,41 @@ public class ImportStaffsCommandHandler :
         var result = await _excelService.ImportAsync(request.Data, mappers: new Dictionary<string, Func<DataRow, StaffDto, object?>>
             {
                 { _localizer[_dto.GetMemberDescription(x=>x.LastName)], (row, item) => item.LastName = row[_localizer[_dto.GetMemberDescription(x=>x.LastName)]].ToString() },
-{ _localizer[_dto.GetMemberDescription(x=>x.FirstName)], (row, item) => item.FirstName = row[_localizer[_dto.GetMemberDescription(x=>x.FirstName)]].ToString() },
-{ _localizer[_dto.GetMemberDescription(x=>x.EmailAddress)], (row, item) => item.EmailAddress = row[_localizer[_dto.GetMemberDescription(x=>x.EmailAddress)]].ToString() },
-{ _localizer[_dto.GetMemberDescription(x=>x.PhoneNumber)], (row, item) => item.PhoneNumber = row[_localizer[_dto.GetMemberDescription(x=>x.PhoneNumber)]].ToString() },
-{ _localizer[_dto.GetMemberDescription(x=>x.Tag)], (row, item) => item.Tag = row[_localizer[_dto.GetMemberDescription(x=>x.Tag)]].ToString() },
-{ _localizer[_dto.GetMemberDescription(x=>x.DepartmentName)], (row, item) => item.DepartmentName = row[_localizer[_dto.GetMemberDescription(x=>x.DepartmentName)]].ToString() },
-
-            }, _localizer[_dto.GetClassDescription()]);
+                { _localizer[_dto.GetMemberDescription(x=>x.FirstName)], (row, item) => item.FirstName = row[_localizer[_dto.GetMemberDescription(x=>x.FirstName)]].ToString() },
+                { _localizer[_dto.GetMemberDescription(x=>x.EmailAddress)], (row, item) => item.EmailAddress = row[_localizer[_dto.GetMemberDescription(x=>x.EmailAddress)]].ToString() },
+                { _localizer[_dto.GetMemberDescription(x=>x.PhoneNumber)], (row, item) => item.PhoneNumber = row[_localizer[_dto.GetMemberDescription(x=>x.PhoneNumber)]].ToString() },
+                { _localizer[_dto.GetMemberDescription(x=>x.Tag)], (row, item) => item.Tag = row[_localizer[_dto.GetMemberDescription(x=>x.Tag)]].ToString() },
+                { _localizer[_dto.GetMemberDescription(x=>x.DepartmentName)], (row, item) => item.DepartmentName = row[_localizer[_dto.GetMemberDescription(x=>x.DepartmentName)]].ToString() },
+                { _localizer[_dto.GetMemberDescription(x=>x.DepartmentAddress)], (row, item) => item.DepartmentAddress = row[_localizer[_dto.GetMemberDescription(x=>x.DepartmentAddress)]].ToString() },
+            }, _localizer[_dto.GetClassDescription()]).ConfigureAwait(true);
         if (result.Succeeded && result.Data is not null)
         {
             foreach (var dto in result.Data)
             {
-                var exists = await _context.Staffs.AnyAsync(x => x.LastName == dto.LastName && x.FirstName == dto.FirstName && x.DepartmentId == dto.DepartmentId, cancellationToken);
+                var dep = await _context.Departments.FirstOrDefaultAsync(x => x.Name == dto.DepartmentName, cancellationToken).ConfigureAwait(true);
+                if(dep is null)
+                {
+                    dep = new Department() { Name = dto.DepartmentName,Address=dto.DepartmentAddress };
+                }
+                var exists = await _context.Staffs.AnyAsync(x => x.LastName == dto.LastName && x.FirstName == dto.FirstName, cancellationToken).ConfigureAwait(true);
                 if (!exists)
                 {
                     var item = _mapper.Map<Staff>(dto);
+                    if (dep.Id > 0)
+                    {
+                        item.DepartmentId = dep.Id;
+                    }
+                    else
+                    {
+                        item.Department = dep;
+                    }
                     // add create domain events if this entity implement the IHasDomainEvent interface
                     // item.AddDomainEvent(new StaffCreatedEvent(item));
-                    await _context.Staffs.AddAsync(item, cancellationToken);
+                    _context.Staffs.Add(item);
                 }
             }
-            await _context.SaveChangesAsync(cancellationToken);
-            return await Result<int>.SuccessAsync(result.Data.Count());
+            await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return await Result<int>.SuccessAsync(result.Data.Count()).ConfigureAwait(false);
         }
         else
         {

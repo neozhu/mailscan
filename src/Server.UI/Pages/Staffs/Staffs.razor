@@ -183,13 +183,16 @@
                         }
                     </CellTemplate>
                 </TemplateColumn>
-                @*TODO: Define the fields that should be displayed in data table*@
-                                <PropertyColumn Property="x => x.LastName" Title="@L[_currentDto.GetMemberDescription(x=>x.LastName)]" />
+                <PropertyColumn Property="x => x.LastName" Title="@L[_currentDto.GetMemberDescription(x=>x.LastName)]" />
                 <PropertyColumn Property="x => x.FirstName" Title="@L[_currentDto.GetMemberDescription(x=>x.FirstName)]" />
                 <PropertyColumn Property="x => x.EmailAddress" Title="@L[_currentDto.GetMemberDescription(x=>x.EmailAddress)]" />
                 <PropertyColumn Property="x => x.PhoneNumber" Title="@L[_currentDto.GetMemberDescription(x=>x.PhoneNumber)]" />
                 <PropertyColumn Property="x => x.Tag" Title="@L[_currentDto.GetMemberDescription(x=>x.Tag)]" />
-                <PropertyColumn Property="x => x.DepartmentName" Title="@L[_currentDto.GetMemberDescription(x=>x.DepartmentName)]" />
+                <PropertyColumn Property="x => x.DepartmentName" Title="@L[_currentDto.GetMemberDescription(x=>x.DepartmentName)]">
+                    <CellTemplate>
+                        @($"{context.Item.DepartmentName} | {context.Item.DepartmentAddress}")
+                    </CellTemplate>
+                </PropertyColumn>
 
             </Columns>
             <NoRecordsContent>
