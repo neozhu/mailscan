@@ -1,9 +1,9 @@
 ﻿@using Services.JsInterop
 @using Services
 @inject IJSRuntime JS
-<MudCard Style="width:358px">
-    <div class="mud-card-media video-container" style="position: relative;width:358px;height:280px">
-        <video id="video" @ref=VideoElement autoplay playsinline style="width:358px;height:273px">
+<MudCard Style="width:390px">
+    <div class="mud-card-media video-container" style="position: relative;width:390px;height:280px">
+        <video id="video" @ref=VideoElement autoplay playsinline style="width:390px;height:273px;object-fit: cover;">
             @if (errorMessage is not null)
             {
                 <div class="alert alert-danger">
@@ -17,15 +17,28 @@
     left: 0;
     width: 100%;
     height: 100%;
+    background-color: rgba(255, 255, 255, 0.5); /* 透明度可以调整 */
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);"></div>
         }
     </div>
     <MudCardActions Class="justify-space-between">
-        <MudLoadingButton Loading="@processing" Variant="Variant.Filled" Disabled="@(!isCameraStreaming)" OnClick="Scan" Color="Color.Primary">Scan</MudLoadingButton>
+        <MudLoadingButton Loading="@processing" StartIcon="@Icons.Material.Filled.DocumentScanner" Variant="Variant.Filled" Disabled="@(!isCameraStreaming)" OnClick="Scan" Color="Color.Primary">Scan</MudLoadingButton>
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack">Previous</MudButton>
     </MudCardActions>
     <MudCardContent>
-        <code>@result</code>
-</MudCardContent>
+        @if (string.IsNullOrEmpty(result))
+        {
+            <MudSkeleton />
+            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="100px" />
+        }
+        else
+        {
+            <code>@result</code>
+        }
+
+    </MudCardContent>
+    <MudCardMedia Image="@imageDataURL"></MudCardMedia>
 </MudCard>
 
 @code {
@@ -59,10 +72,8 @@
         StateHasChanged();
     }
     [JSInvokable]
-    public async void OnCaptureCallback(string data)
-    {
-        var stream = saveBase64Image(data);
-        result =await _ocrService.Process(stream);
+    public async Task OnCaptureCallback(string data)      {        imageDataURL = data;        var stream = saveBase64Image(data);
+        result = await _ocrService.Process(stream).ConfigureAwait(true);
         processing = false;
         StateHasChanged();
     }
@@ -76,6 +87,6 @@
     {
         result = "";
         processing = true;
-        await new CameraScanJS(JS).Capture(VideoElement,objRef);
+        await new CameraScanJS(JS).Capture(VideoElement, objRef);
     }
 }

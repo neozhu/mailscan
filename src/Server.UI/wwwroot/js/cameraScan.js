@@ -62,11 +62,28 @@ function errorMsg(msg, error, dotnet) {
 export async function capture(videoElement, dotnet) {
     const canvasElement = document.createElement('canvas');
     const context = canvasElement.getContext('2d');
-    canvasElement.width = videoElement.videoWidth;
-    canvasElement.height = videoElement.videoHeight;
-    context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+
+    // 计算缩放比例
+    const scaleX = videoElement.clientWidth / videoElement.videoWidth;
+    const scaleY = videoElement.clientHeight / videoElement.videoHeight;
+    const scale = Math.max(scaleX, scaleY);
+
+    // 计算裁剪区域
+    const cropWidth = videoElement.clientWidth / scale;
+    const cropHeight = videoElement.clientHeight / scale;
+    const left = (videoElement.videoWidth - cropWidth) / 2;
+    const top = (videoElement.videoHeight - cropHeight) / 2;
+
+    // 设置canvas尺寸与video元素一致
+    canvasElement.width = videoElement.clientWidth;
+    canvasElement.height = videoElement.clientHeight;
+
+    // 从video中截取与显示尺寸相匹配的部分
+    context.drawImage(videoElement, left, top, cropWidth, cropHeight, 0, 0, canvasElement.width, canvasElement.height);
+
     // 获取图片数据
     const imageDataURL = canvasElement.toDataURL('image/png');
+
     // 这里可以将 imageDataURL 保存或发送到服务器
     //console.log(dotnet, imageDataURL)
     dotnet.invokeMethodAsync("OnCaptureCallback", imageDataURL);

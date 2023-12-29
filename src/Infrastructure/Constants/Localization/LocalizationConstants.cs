@@ -9,13 +9,13 @@ public static class LocalizationConstants
     public static readonly LanguageCode[] SupportedLanguages = {
             new LanguageCode
             {
-                Code = "en-US",
-                DisplayName= "English"
+                Code = "de-DE",
+                DisplayName = "Deutsch"
             },
             new LanguageCode
             {
-                Code = "de-DE",
-                DisplayName = "Deutsch"
+                Code = "en-US",
+                DisplayName= "English"
             },
             new LanguageCode
             {
@@ -62,6 +62,6 @@ public static class LocalizationConstants
 
 public class LanguageCode
 {
-    public string DisplayName { get; set; } = "en-US";
-    public string Code { get; set; } = "English";
+    public string DisplayName { get; set; } = "de-DE";
+    public string Code { get; set; } = "Deutsch";
 }
