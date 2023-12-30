@@ -69,12 +69,14 @@
     private DotNetObjectReference<CameraScan>? objRef;
     [Inject]
     private OCRService _ocrService { get; set; } = null!;
-
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+    private string currrentUser = "";
 
     protected override void OnInitialized()
     {
         objRef = DotNetObjectReference.Create(this);
-        
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -82,6 +84,7 @@
         if (firstRender)
         {
             await new CameraScanJS(JS).Init(VideoElement, objRef);
+            currrentUser = (await AuthState).User.GetUserName();
         }
     }
     [JSInvokable]
@@ -95,7 +98,7 @@
     {
         imageDataURL = data;
         var stream = saveBase64Image(data);
-        result = await _ocrService.Process(stream).ConfigureAwait(true);
+        result = await _ocrService.Process(stream,currrentUser).ConfigureAwait(true);
         processing = false;
         if (result.Entities.Persons is null)
         {

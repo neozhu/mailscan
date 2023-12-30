@@ -23,11 +23,11 @@
                 <MudItem xs="12" md="6">
                     <MudTextField Label="@L[model.GetMemberDescription(x=>x.Tag)]" @bind-Value="model.Tag" For="@(() => model.Tag)" Required="false" RequiredError="@L["tag is required!"]"></MudTextField>
                 </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.LastName)]" @bind-Value="model.LastName" For="@(() => model.LastName)" Required="true" RequiredError="@L["last name is required!"]"></MudTextField>
+                 <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.FirstName)]" @bind-Value="model.FirstName" For="@(() => model.FirstName)" Required="false" RequiredError="@L["first name is required!"]"></MudTextField>
                 </MudItem>
                 <MudItem xs="12" md="6">
-                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.FirstName)]" @bind-Value="model.FirstName" For="@(() => model.FirstName)" Required="false" RequiredError="@L["first name is required!"]"></MudTextField>
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.LastName)]" @bind-Value="model.LastName" For="@(() => model.LastName)" Required="true" RequiredError="@L["last name is required!"]"></MudTextField>
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudTextField Label="@L[model.GetMemberDescription(x=>x.EmailAddress)]" @bind-Value="model.EmailAddress" For="@(() => model.EmailAddress)" Required="false" RequiredError="@L["email address is required!"]"></MudTextField>

@@ -4,6 +4,7 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CleanArchitecture.Blazor.Application.Features.ScanHistories.Caching;
 
 namespace CleanArchitecture.Blazor.Server.UI.Services;
 
@@ -11,12 +12,14 @@ public class OCRService
 {
     private readonly HttpClient _httpClient;
     private readonly IHttpContextAccessor _httpContext;
+    private readonly IApplicationDbContext _dbContext;
 
-    public OCRService(IHttpClientFactory httpClientFactory,IHttpContextAccessor httpContext) {
+    public OCRService(IHttpClientFactory httpClientFactory,IHttpContextAccessor httpContext, IApplicationDbContext dbContext) {
         _httpClient = httpClientFactory.CreateClient("BackendApiClient");
         _httpContext = httpContext;
+        _dbContext = dbContext;
     }
-    public async Task<ProcessResult?> Process(Stream stream)
+    public async Task<ProcessResult?> Process(Stream stream,string user)
     {
         var cultureCookie = _httpContext.HttpContext.Request.Cookies[".AspNetCore.Culture"];
         if (!string.IsNullOrEmpty(cultureCookie))
@@ -80,7 +83,23 @@ public class OCRService
             // 获取并打印响应内容
             string responseBody = await response.Content.ReadAsStringAsync();
             Console.WriteLine(responseBody);
-            return JsonSerializer.Deserialize<ProcessResult>(responseBody); ;
+            var result =  JsonSerializer.Deserialize<ProcessResult>(responseBody);
+
+            if (result.Entities.Persons is not null) {
+                var username=result.Entities.Persons.FirstOrDefault()??"";
+                var staff = await _dbContext.Staffs.FirstOrDefaultAsync(x => username.Contains(x.FirstName) && username.Contains(x.LastName)).ConfigureAwait(true);
+                if(staff is not null)
+                {
+                    result.Entities.Locations = new List<string>() { staff.Department?.Address };
+                    result.Entities.Organizations = new List<string>() { staff.Department?.Name };
+                    var history = new ScanHistory() { RecognizingText = responseBody, Address = staff.Department?.Address, Department = staff.Department?.Name, ElapsedTime = result.ProcessingTime, FistName = staff.FirstName, LastName = staff.LastName, ScanDateTime = DateTime.Now, MatchStatus = "Success", Operator= user };
+                    _dbContext.ScanHistories.Add(history);
+                    await _dbContext.SaveChangesAsync(default).ConfigureAwait(false);
+                    ScanHistoryCacheKey.Refresh();
+                }
+            }
+
+            return result;
         }
     }
 
@@ -90,7 +109,7 @@ public class OCRService
         public Entities Entities { get; set; }
 
         [JsonPropertyName("processing_time")]
-        public double ProcessingTime { get; set; }
+        public decimal ProcessingTime { get; set; }
     }
 
     public class Entities

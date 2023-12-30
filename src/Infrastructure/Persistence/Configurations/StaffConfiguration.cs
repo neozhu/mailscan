@@ -12,6 +12,7 @@ public class StaffConfiguration : IEntityTypeConfiguration<Staff>
     {
         builder.Property(t => t.LastName).HasMaxLength(50).IsRequired();
         builder.HasOne(t => t.Department).WithMany(x => x.Staffs).HasForeignKey(x => x.DepartmentId);
+        builder.Navigation(t => t.Department).AutoInclude();
         builder.Ignore(e => e.DomainEvents);
     }
 }

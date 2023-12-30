@@ -132,18 +132,23 @@
                         }
                     </CellTemplate>
                 </TemplateColumn>
-                @*TODO: Define the fields that should be displayed in data table*@
-                                <PropertyColumn Property="x => x.RecognizingText" Title="@L[_currentDto.GetMemberDescription(x=>x.RecognizingText)]" />
+               
                 <PropertyColumn Property="x => x.MatchStatus" Title="@L[_currentDto.GetMemberDescription(x=>x.MatchStatus)]" />
-                <PropertyColumn Property="x => x.Department" Title="@L[_currentDto.GetMemberDescription(x=>x.Department)]" />
-                <PropertyColumn Property="x => x.FistName" Title="@L[_currentDto.GetMemberDescription(x=>x.FistName)]" />
-                <PropertyColumn Property="x => x.LastName" Title="@L[_currentDto.GetMemberDescription(x=>x.LastName)]" />
-                <PropertyColumn Property="x => x.Address" Title="@L[_currentDto.GetMemberDescription(x=>x.Address)]" />
+                <PropertyColumn Property="x => x.Department" Title="@L[_currentDto.GetMemberDescription(x=>x.Department)]">
+                    <CellTemplate>
+                              @($"{context.Item.Department} | {context.Item.Address}")
+                          </CellTemplate>
+                </PropertyColumn>
+                      <PropertyColumn Property="x => x.LastName" Title="@L[_currentDto.GetMemberDescription(x=>x.LastName)]">
+                          <CellTemplate>
+                              @($"{context.Item.FistName} {context.Item.LastName}")
+                          </CellTemplate>
+                          </PropertyColumn>
+           
                 <PropertyColumn Property="x => x.ElapsedTime" Title="@L[_currentDto.GetMemberDescription(x=>x.ElapsedTime)]" />
                 <PropertyColumn Property="x => x.Operator" Title="@L[_currentDto.GetMemberDescription(x=>x.Operator)]" />
                 <PropertyColumn Property="x => x.ScanDateTime" Title="@L[_currentDto.GetMemberDescription(x=>x.ScanDateTime)]" />
-                <PropertyColumn Property="x => x.Comments" Title="@L[_currentDto.GetMemberDescription(x=>x.Comments)]" />
-
+                     <PropertyColumn Property="x => x.RecognizingText" Title="@L[_currentDto.GetMemberDescription(x=>x.RecognizingText)]" />
             </Columns>
             <NoRecordsContent>
                 <MudText>@ConstantString.NoRecords</MudText>
