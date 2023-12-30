@@ -21,5 +21,9 @@ public partial class CameraScanJS
         var jsmodule = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/cameraScan.js");
         return jsmodule.InvokeVoidAsync("capture", videoElment, dotNetObject);
     }
-
+    public async Task<ValueTask> CameraOff()
+    {
+        var jsmodule = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/cameraScan.js");
+        return jsmodule.InvokeVoidAsync("vidOff");
+    }
 }

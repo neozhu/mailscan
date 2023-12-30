@@ -34,6 +34,13 @@ export async function getCameraFeed(videoElement, dotnet) {
         handleError(error, dotnet);
     }
 }
+export async function vidOff(videoElement) {
+    console.log('vidOff')
+    window.vid.pause();
+    window.vid.src = "";
+    window.vid.srcObject = null;
+    window.stream.getTracks()[0].stop();
+}
 function handleSuccess(stream, video) {
     const videoTracks = stream.getVideoTracks();
     console.log("Got stream with constraints:", constraints);
