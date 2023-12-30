@@ -2,7 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Net.Http.Headers;
-using HarfBuzzSharp;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace CleanArchitecture.Blazor.Server.UI.Services;
 
@@ -15,7 +16,7 @@ public class OCRService
         _httpClient = httpClientFactory.CreateClient("BackendApiClient");
         _httpContext = httpContext;
     }
-    public async Task<string> Process(Stream stream)
+    public async Task<ProcessResult?> Process(Stream stream)
     {
         var cultureCookie = _httpContext.HttpContext.Request.Cookies[".AspNetCore.Culture"];
         if (!string.IsNullOrEmpty(cultureCookie))
@@ -79,7 +80,28 @@ public class OCRService
             // 获取并打印响应内容
             string responseBody = await response.Content.ReadAsStringAsync();
             Console.WriteLine(responseBody);
-            return responseBody;
+            return JsonSerializer.Deserialize<ProcessResult>(responseBody); ;
         }
     }
+
+    public class ProcessResult
+    {
+        [JsonPropertyName("entities")]
+        public Entities Entities { get; set; }
+
+        [JsonPropertyName("processing_time")]
+        public double ProcessingTime { get; set; }
+    }
+
+    public class Entities
+    {
+        [JsonPropertyName("PER")]
+        public List<string>? Persons { get; set; }
+
+        [JsonPropertyName("LOC")]
+        public List<string>? Locations { get; set; }
+
+        [JsonPropertyName("ORG")]
+        public List<string>? Organizations { get; set; }
+}
 }

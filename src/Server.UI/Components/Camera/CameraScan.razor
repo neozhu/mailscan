@@ -24,18 +24,35 @@
     </div>
     <MudCardActions Class="justify-space-between">
         <MudLoadingButton Loading="@processing" StartIcon="@Icons.Material.Filled.DocumentScanner" Variant="Variant.Filled" Disabled="@(!isCameraStreaming)" OnClick="Scan" Color="Color.Primary">Scan</MudLoadingButton>
-        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack">Previous</MudButton>
+        <MudButton   Variant="Variant.Filled" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Clear" OnClick="@(()=>Histories.Clear())"  >Clear</MudButton>
     </MudCardActions>
+     <MudCardContent Class="ma-0 pa-0">
+        
+         <MudList>
+            @if (processing)
+            {
+                <MudListItem>
+                    <MudPaper Class="pa-5">
+                <MudSkeleton Height="30px" />
+                <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="40px" />
+                    </MudPaper>
+                </MudListItem>
+            }
+            @foreach (var item in Histories)
+            {
+                <MudListItem>
+                    <MudPaper Class="pa-5">
+                        <MudText Typo="Typo.h6">Name: @item.Entities.Persons?.FirstOrDefault()</MudText>
+                        <MudText Class="">Department: @item.Entities.Organizations?.FirstOrDefault()</MudText>
+                        <MudText>Address: @item.Entities.Locations?.First()</MudText>
+                    </MudPaper>
+                </MudListItem>
+            }
+         </MudList>
+     </MudCardContent>
     <MudCardContent>
-        @if (string.IsNullOrEmpty(result))
-        {
-            <MudSkeleton />
-            <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="100px" />
-        }
-        else
-        {
-            <code>@result</code>
-        }
+        
+        
 
     </MudCardContent>
     <MudCardMedia Image="@imageDataURL"></MudCardMedia>
@@ -47,7 +64,8 @@
     private bool processing = false;
     private bool isCameraStreaming;
     private string imageDataURL;
-    private string result;
+    private List<OCRService.ProcessResult> Histories=new List<OCRService.ProcessResult>();
+    private OCRService.ProcessResult? result;
     private DotNetObjectReference<CameraScan>? objRef;
     [Inject]
     private OCRService _ocrService { get; set; } = null!;
@@ -56,6 +74,7 @@
     protected override void OnInitialized()
     {
         objRef = DotNetObjectReference.Create(this);
+        
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -72,9 +91,23 @@
         StateHasChanged();
     }
     [JSInvokable]
-    public async Task OnCaptureCallback(string data)      {        imageDataURL = data;        var stream = saveBase64Image(data);
+    public async Task OnCaptureCallback(string data)
+    {
+        imageDataURL = data;
+        var stream = saveBase64Image(data);
         result = await _ocrService.Process(stream).ConfigureAwait(true);
         processing = false;
+        if (result.Entities.Persons is null)
+        {
+            Snackbar.Add("The system is unable to identify the person", MudBlazor.Severity.Error);
+        }
+        else
+        {
+            Snackbar.Add(result.Entities.Persons.First(), MudBlazor.Severity.Info);
+            Histories.Add(result);
+            Histories.Reverse();
+        }
+        
         StateHasChanged();
     }
     private MemoryStream saveBase64Image(string base64Image)
@@ -85,7 +118,7 @@
     }
     private async Task Scan()
     {
-        result = "";
+        result = null;
         processing = true;
         await new CameraScanJS(JS).Capture(VideoElement, objRef);
     }
