@@ -1,7 +1,7 @@
 ﻿@using Services.JsInterop
 @using Services
 
-@implements IDisposable
+@implements IAsyncDisposable
 
 @inject IJSRuntime JS
 
@@ -82,11 +82,11 @@
         objRef = DotNetObjectReference.Create(this);
 
     }
-    public void Dispose()
+    public async ValueTask  DisposeAsync()
     {
         if (JsInterop != null)
         {
-            JsInterop.CameraOff();
+           await JsInterop.CameraOff();
         }
     }
 
