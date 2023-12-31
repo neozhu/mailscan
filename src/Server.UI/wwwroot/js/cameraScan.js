@@ -29,7 +29,8 @@ export async function getCameraFeed(videoElement, dotnet) {
             audio: false
         });
         handleSuccess(stream, videoElement);
-        dotnet.invokeMethodAsync("OnCameraStreaming");
+        dotnet.invokeMethodAsync("OnCameraStreaming", window.innerWidth);
+        console.log('OnCameraStreaming', window.innerWidth)
     } catch (error) {
         handleError(error, dotnet);
     }
