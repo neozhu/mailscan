@@ -39,6 +39,13 @@ Built with the latest .NET 8 framework, MailScan combines robust performance wit
 3. Place the envelope under the camera and click the 'Scan' button.
 4. View the extracted recipient details and the assigned sorting category.
 
+## How It Works:
+
+1. Scan: The assistant uses their smartphone to scan the letters through the application.
+2. OCR Processing: Once the image of the letter is sent to the backend (powered by Python FastAPI service), OCR technology extracts the text.
+3. NLP Analysis: The application then performs natural language processing to identify names within the letter.
+4. Database Lookup: It uses these names to search a database for the employee's details, including their department and office address.
+
 ## Technologies Used
 - Blazor Server Application
 - .NET 8
