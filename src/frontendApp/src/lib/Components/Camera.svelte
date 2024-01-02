@@ -1,16 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-    import { getModalStore,SlideToggle } from '@skeletonlabs/skeleton';
-    import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
+	import { enhance,applyAction } from '$app/forms';
+	import { getModalStore, SlideToggle } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 	import { Icon, Camera, ArrowPathRoundedSquare, VideoCameraSlash } from 'svelte-hero-icons';
 
-	const modalStore:ModalStore  = getModalStore();
+	const modalStore: ModalStore = getModalStore();
 	let videoElement: HTMLMediaElement;
+    let form:HTMLFormElement;
 	let stream: MediaStream;
 	let started: boolean = false;
 	let useFrontCamera: boolean = false;
 	let multipleCamerasAvailable: boolean = false;
 	let processing: boolean = false;
+    let screenshotData:string;
 	onMount(async () => {
 		const devices = await navigator.mediaDevices.enumerateDevices();
 		const videoInputs = devices.filter((device) => device.kind === 'videoinput');
@@ -81,7 +84,10 @@
 
 		// 获取图片数据
 		const imageDataURL = canvasElement.toDataURL('image/png');
-		console.log(imageDataURL);
+        screenshotData = imageDataURL;
+        console.log(screenshotData);
+        form.submit();
+		
 		const modal: ModalSettings = {
 			type: 'alert',
 			// Data
@@ -91,6 +97,13 @@
 		modalStore.trigger(modal);
 		setTimeout(() => (processing = false), 3000);
 	}
+
+    function handleSubmit(event:SubmitEvent){
+        console.log('handleSubmit')
+        const data = new FormData(event.currentTarget);
+        data.set('screenshot','abc');
+        applyAction(data);
+    }
 </script>
 
 <header
@@ -108,7 +121,12 @@
 		</div>
 	{:else}
 		<div class="fixed flex justify-end w-full top-10 z-20 py-10 gap-4 px-10">
-			<SlideToggle name="slider-label"  active="bg-primary-500" size="sm" checked={started} on:change={stopCamera}
+			<SlideToggle
+				name="slider-label"
+				active="bg-primary-500"
+				size="sm"
+				checked={started}
+				on:change={stopCamera}
 			></SlideToggle>
 		</div>
 	{/if}
@@ -120,13 +138,16 @@
 		<track kind="captions" srclang="en" label="English" />
 	</video>
 	<div class="fixed flex justify-center w-full bottom-0 z-10 py-10 gap-4">
-		<button
-			disabled={!started}
-			on:click={captureCamera}
-			type="button"
-			class="btn-icon space-x-3 bg-gradient-to-br variant-gradient-tertiary-primary btn-icon-xl variant-filled"
-			><Icon src={Camera} size="32"></Icon></button
-		>
+		<form bind:this={form} use:enhance method="post" action="/process" on:submit|preventDefault={handleSubmit}>
+			<input type="hidden" name="screenshot" bind:value={screenshotData} />
+			<button
+				disabled={!started}
+				type="submit"
+		 
+				class="btn-icon space-x-3 bg-gradient-to-br variant-gradient-tertiary-primary btn-icon-xl variant-filled"
+				><Icon src={Camera} size="32"></Icon></button
+			>
+		</form>
 		{#if multipleCamerasAvailable}
 			<button
 				type="button"
