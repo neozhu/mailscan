@@ -113,9 +113,9 @@ public class OCRService
                     _dbContext.Staffs.Add(staff);
                     await _dbContext.SaveChangesAsync(default).ConfigureAwait(false);
                     StaffCacheKey.Refresh();
-
+                    result.CreatedStaff = staff;
                 }
-                result.FindStaff = staff;
+               
             }
 
             return result;
@@ -130,7 +130,7 @@ public class OCRService
         [JsonPropertyName("processing_time")]
         public decimal ProcessingTime { get; set; }
         [JsonIgnore]
-        public Staff? FindStaff { get; set; }
+        public Staff? CreatedStaff { get; set; }
     }
 
     public class Entities

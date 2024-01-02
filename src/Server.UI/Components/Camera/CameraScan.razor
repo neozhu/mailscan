@@ -1,6 +1,7 @@
 ﻿@using Services.JsInterop
 @using Services
-
+@using CleanArchitecture.Blazor.Application.Features.Staffs.Commands.AddEdit
+@using CleanArchitecture.Blazor.Server.UI.Pages.Staffs.Components
 @implements IAsyncDisposable
 
 @inject IJSRuntime JS
@@ -120,9 +121,24 @@
         }
         else
         {
-            Snackbar.Add($"recognize person name {result.Entities.Persons.First()} elapsed time:{result.ProcessingTime}", MudBlazor.Severity.Info);
-            Histories.Add(result);
-            Histories.Reverse();
+            if (result.CreatedStaff is not null)
+            {
+                var command = new AddEditStaffCommand() { DepartmentId = null, FirstName = result.CreatedStaff.FirstName, LastName = result.CreatedStaff.LastName };
+                var parameters = new DialogParameters<StaffFormDialog> { { x => x.model, command } };
+                var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+                var dialog = DialogService.Show<StaffFormDialog>("Edit the sltaff", parameters, options);
+                var state = await dialog.Result;
+                if (!state.Canceled)
+                {
+                    Snackbar.Add($"updated successfully. ", MudBlazor.Severity.Success);
+                }
+            }
+            else
+            {
+                Snackbar.Add($"recognize person name {result.Entities.Persons.First()} elapsed time:{result.ProcessingTime}", MudBlazor.Severity.Info);
+                Histories.Add(result);
+                Histories.Reverse();
+            }
         }
         
         StateHasChanged();
