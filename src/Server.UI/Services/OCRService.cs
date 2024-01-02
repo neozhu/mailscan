@@ -5,6 +5,8 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CleanArchitecture.Blazor.Application.Features.ScanHistories.Caching;
+using CleanArchitecture.Blazor.Application.Features.Staffs.Caching;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace CleanArchitecture.Blazor.Server.UI.Services;
 
@@ -88,15 +90,32 @@ public class OCRService
             if (result.Entities.Persons is not null) {
                 var username=result.Entities.Persons.FirstOrDefault()??"";
                 var staff = await _dbContext.Staffs.FirstOrDefaultAsync(x => username.Contains(x.FirstName) && username.Contains(x.LastName)).ConfigureAwait(true);
-                if(staff is not null)
+                if (staff is not null)
                 {
                     result.Entities.Locations = new List<string>() { staff.Department?.Address };
                     result.Entities.Organizations = new List<string>() { staff.Department?.Name };
-                    var history = new ScanHistory() { RecognizingText = responseBody, Address = staff.Department?.Address, Department = staff.Department?.Name, ElapsedTime = result.ProcessingTime, FistName = staff.FirstName, LastName = staff.LastName, ScanDateTime = DateTime.Now, MatchStatus = "Success", Operator= user };
+                    var history = new ScanHistory() { RecognizingText = responseBody, Address = staff.Department?.Address, Department = staff.Department?.Name, ElapsedTime = result.ProcessingTime, FistName = staff.FirstName, LastName = staff.LastName, ScanDateTime = DateTime.Now, MatchStatus = "Success", Operator = user };
                     _dbContext.ScanHistories.Add(history);
                     await _dbContext.SaveChangesAsync(default).ConfigureAwait(false);
                     ScanHistoryCacheKey.Refresh();
                 }
+                else
+                {
+                    var lastName = username;
+                    var firstName = "";
+                    if (username.Contains(' '))
+                    {
+                        string[] nameParts = username.Split(' ');
+                        firstName = nameParts[0];
+                        lastName = nameParts[1];
+                    }
+                    staff = new Staff() { LastName = lastName, FirstName = firstName };
+                    _dbContext.Staffs.Add(staff);
+                    await _dbContext.SaveChangesAsync(default).ConfigureAwait(false);
+                    StaffCacheKey.Refresh();
+
+                }
+                result.FindStaff = staff;
             }
 
             return result;
@@ -110,6 +129,8 @@ public class OCRService
 
         [JsonPropertyName("processing_time")]
         public decimal ProcessingTime { get; set; }
+        [JsonIgnore]
+        public Staff? FindStaff { get; set; }
     }
 
     public class Entities
