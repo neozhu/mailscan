@@ -1,13 +1,21 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { enhance, applyAction } from '$app/forms';
-	import { getModalStore, SlideToggle } from '@skeletonlabs/skeleton';
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore, SlideToggle, getToastStore } from '@skeletonlabs/skeleton';
+	import type {
+		ToastSettings,
+		ModalSettings,
+		ModalComponent,
+		ModalStore,
+		ToastStore
+	} from '@skeletonlabs/skeleton';
 	import { Icon, Camera, ArrowPathRoundedSquare, VideoCameraSlash } from 'svelte-hero-icons';
-	import type { Blob } from 'buffer';
+	import { Blob } from 'buffer';
 
 	const modalStore: ModalStore = getModalStore();
-	let videoElement: HTMLMediaElement;
+	const toastStore: ToastStore = getToastStore();
+	let videoElement: HTMLVideoElement;
+	let fileElement: HTMLInputElement;
 	let form: HTMLFormElement;
 	let stream: MediaStream;
 	let started: boolean = false;
@@ -24,11 +32,22 @@
 	async function startCamera() {
 		try {
 			stream = await navigator.mediaDevices.getUserMedia({
-				video: { facingMode: useFrontCamera ? 'user' : 'environment' },
+				video: {
+					width: { ideal: 1920 }, // 期望的宽度
+					height: { ideal: 1080 }, // 期望的高度
+					facingMode: useFrontCamera ? 'user' : 'environment'
+				},
 				audio: false
 			});
 			videoElement.srcObject = stream;
 			started = true;
+			const toast: ToastSettings = {
+				message: 'start working',
+				timeout: 2000,
+				autohide: true,
+				background: 'variant-filled-success',
+			};
+			toastStore.trigger(toast);
 		} catch (err) {
 			console.error('Error accessing the camera:', err);
 		}
@@ -47,6 +66,14 @@
 			tracks.forEach((track) => track.stop());
 			videoElement.srcObject = null;
 			started = false;
+
+			const toast: ToastSettings = {
+				message: 'closed camera',
+				timeout: 2000,
+				autohide: true,
+				background: 'variant-filled-surface',
+			};
+			toastStore.trigger(toast);
 		}
 	}
 
@@ -54,7 +81,6 @@
 		return new Promise((resolve, reject) => {
 			const canvasElement = document.createElement('canvas');
 			const context = canvasElement.getContext('2d');
-
 			// 计算缩放比例
 			const scaleX = videoElement.clientWidth / videoElement.videoWidth;
 			const scaleY = videoElement.clientHeight / videoElement.videoHeight;
@@ -71,7 +97,7 @@
 			canvasElement.height = videoElement.clientHeight;
 
 			// 从video中截取与显示尺寸相匹配的部分
-			context.drawImage(
+			context?.drawImage(
 				videoElement,
 				left,
 				top,
@@ -84,16 +110,17 @@
 			);
 			screenshotDataURL = canvasElement.toDataURL('image/png');
 			// 获取图片数据
-			canvasElement.toBlob(blob => {
-            if (blob) {
-                resolve(blob);
-            } else {
-                reject(new Error("Failed to extract blob from canvas"));
-            }
-        	}, 'image/png');
+			canvasElement.toBlob((blob) => {
+				if (blob && blob instanceof Blob) {
+					resolve(blob);
+				} else {
+					reject(new Error('Failed to extract blob from canvas'));
+				}
+			}, 'image/png');
 		});
 	}
 	function showResult() {
+		processing = false
 		const modal: ModalSettings = {
 			type: 'alert',
 			// Data
@@ -101,24 +128,20 @@
 			image: screenshotDataURL
 		};
 		modalStore.trigger(modal);
-		setTimeout(() => (processing = false), 3000);
+ 
 	}
 	async function handleCaptureClick() {
 		if (!started) return;
-		
-		processing=true;
+		processing = true;
 		const imageBlob = await captureCamera();
-		const file = new File([imageBlob] as BlobPart[], "image.png", { type: 'image/png' });
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        
-        const fileInput = form.querySelector('input[type="file"]') as HTMLInputElement;
-        fileInput.files = dataTransfer.files;
+		const file = new File([imageBlob] as BlobPart[], 'image.png', { type: 'image/png' });
+		const dataTransfer = new DataTransfer();
+		dataTransfer.items.add(file);
+		fileElement.files = dataTransfer.files;
 		form.requestSubmit();
 	}
 	async function handleSubmit(event: SubmitEvent & { currentTarget: HTMLFormElement }) {
 		event.preventDefault();
-		 
 	}
 </script>
 
@@ -149,7 +172,7 @@
 	<video
 		bind:this={videoElement}
 		autoplay
-		class="absolute object-cover z-10 w-auto min-w-full min-h-full max-w-none"
+		class="absolute object-cover z-10 w-auto w-screen h-screen max-w-none"
 	>
 		<track kind="captions" srclang="en" label="English" />
 	</video>
@@ -160,10 +183,9 @@
 			use:enhance={({ formElement, formData, action, cancel }) => {
 				return async ({ result }) => {
 					if (result.type === 'success') {
-						console.log(result)
+						console.log(result);
 						await applyAction(result);
-						processing=false;
-						showResult()
+						showResult();
 					}
 				};
 			}}
@@ -171,7 +193,7 @@
 			action="?/process"
 			on:submit|preventDefault={handleSubmit}
 		>
-			<input type="file" style="display: none;" name="image"  />
+			<input type="file" style="display: none;" name="image" bind:this={fileElement} />
 			<button
 				on:click={handleCaptureClick}
 				disabled={!started}
