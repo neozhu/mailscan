@@ -14,7 +14,7 @@
 	let useFrontCamera: boolean = false;
 	let multipleCamerasAvailable: boolean = false;
 	let processing: boolean = false;
-	let screenshotData: string;
+	let screenshotDataURL: string;
 	onMount(async () => {
 		const devices = await navigator.mediaDevices.enumerateDevices();
 		const videoInputs = devices.filter((device) => device.kind === 'videoinput');
@@ -82,7 +82,7 @@
 				canvasElement.width,
 				canvasElement.height
 			);
-
+			screenshotDataURL = canvasElement.toDataURL('image/png');
 			// 获取图片数据
 			canvasElement.toBlob(blob => {
             if (blob) {
@@ -98,7 +98,7 @@
 			type: 'alert',
 			// Data
 			title: 'capture camera image',
-			image: screenshotData
+			image: screenshotDataURL
 		};
 		modalStore.trigger(modal);
 		setTimeout(() => (processing = false), 3000);
@@ -162,7 +162,8 @@
 					if (result.type === 'success') {
 						console.log(result)
 						await applyAction(result);
-						processing=false
+						processing=false;
+						showResult()
 					}
 				};
 			}}
