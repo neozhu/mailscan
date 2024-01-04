@@ -9,8 +9,7 @@
 		ModalStore,
 		ToastStore
 	} from '@skeletonlabs/skeleton';
-	import { Icon, Camera, ArrowPathRoundedSquare, VideoCameraSlash } from 'svelte-hero-icons';
- 
+	import { Camera, SwitchCamera,Scan} from 'svelte-lucide';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -45,7 +44,7 @@
 				message: 'start working',
 				timeout: 2000,
 				autohide: true,
-				background: 'variant-filled-success',
+				background: 'variant-glass-surface',
 			};
 			toastStore.trigger(toast);
 		} catch (err) {
@@ -71,7 +70,7 @@
 				message: 'closed camera',
 				timeout: 2000,
 				autohide: true,
-				background: 'variant-filled-surface',
+				background: 'variant-glass-surface',
 			};
 			toastStore.trigger(toast);
 		}
@@ -154,12 +153,12 @@
 		<div class="relative z-30 p-5 text-2xl bg-opacity-50">
 			<button
 				type="button"
-				class="btn btn-xl variant-filled-surface shadow-lg"
-				on:click={startCamera}>Start</button
+				class="btn   btn-xl bg-gradient-to-br variant-gradient-secondary-tertiary shadow-lg"
+				on:click={startCamera}><Scan class="mr-3"></Scan> Start</button
 			>
 		</div>
 	{:else}
-		<div class="fixed flex justify-end w-full top-10 z-20 py-10 gap-4 px-10">
+		<div class="fixed flex justify-end w-full top-14 z-20 py-10 gap-4 px-10">
 			<SlideToggle
 				name="slider-label"
 				active="bg-primary-500"
@@ -198,15 +197,15 @@
 				on:click={handleCaptureClick}
 				disabled={!started}
 				type="button"
-				class="btn-icon space-x-3 bg-gradient-to-br variant-gradient-tertiary-primary btn-icon-xl variant-filled shadow-lg"
-				><Icon src={Camera} size="32"></Icon></button
+				class="btn-icon space-x-3 bg-gradient-to-br variant-gradient-secondary-primary btn-icon-xl variant-filled shadow-lg"
+				><Camera size="32"></Camera></button
 			>
 		</form>
 		{#if multipleCamerasAvailable}
 			<button
 				type="button"
 				class="btn-icon space-x-3 bg-gradient-to-br variant-gradient-tertiary-primary btn-icon-xl variant-filled"
-				on:click={toggleCamera}><Icon src={ArrowPathRoundedSquare} size="32"></Icon></button
+				on:click={toggleCamera}><SwitchCamera size="32"></SwitchCamera></button
 			>
 		{/if}
 	</div>

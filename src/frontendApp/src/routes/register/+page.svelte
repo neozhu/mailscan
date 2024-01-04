@@ -3,26 +3,38 @@
     import {  LOGIN_PATH } from '$lib/constant';
     import { applyAction, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+	import type { ToastSettings, ToastStore } from '@skeletonlabs/skeleton';
+	const toastStore: ToastStore = getToastStore();
 
     export let form: ActionData;
 	$: error = form?.error;
 
 	$: formatError = (key: string) => (error?.code == key ? error.message : '');
- 
+    function showToast() {
+		const t: ToastSettings = {
+			message: 'Account created successfully!',
+			timeout: 4000,
+            background: 'variant-filled-success',
+			hoverable: true
+		};
+		toastStore.trigger(t);
+	}
 </script>
-<div class="py-10 p-0 mx-auto max-w-md">
+<div class="py-20 p-0 mx-auto max-w-md">
     <header class="text-center py-4">
         <div class="text-center mb-2 text-3xl font-bold">Create Your Account</div>
         <p class="unstyled text-sm md:text-base opacity-50">
             Already have an account? <a href="{LOGIN_PATH}">Login here</a>
         </p>
     </header>
-    <div class="card p-6 space-y-6 shadow-xl text-lef">
+    <div class="card variant-glass-surface p-6 space-y-6 shadow-xl text-lef">
         <form class="space-y-4" method="POST"
 		action="?/register" use:enhance={() =>
 			async ({ result }) => {
 				invalidateAll();
 				await applyAction(result);
+                showToast();
 			}}>
             <label class="label">
                 <span>Email</span>

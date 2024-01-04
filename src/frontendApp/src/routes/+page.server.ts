@@ -23,7 +23,7 @@ export const actions: Actions = {
 		const file = data.get('image') as File;
 
 		if (file && file instanceof File) {
-			console.log(file);
+			//console.log(file);
 			const buffer = await file.arrayBuffer();
 			const worker = await Tesseract.createWorker('eng');
 			const { data: { text } } = await worker.recognize(buffer, { rotateAuto: true });

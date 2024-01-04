@@ -45,7 +45,7 @@
 	};
 </script>
 
-<AppBar class="h-16  space-y-4 p-4 shadow-2xl">
+<AppBar background="variant-glass-surface" class="h-20 fixed  top-0 w-full space-y-4 p-4 shadow-2xl z-50">
 	<svelte:fragment slot="lead">
 		<Menu class="h-6 w-6 text-blue-500" />
 	</svelte:fragment>
@@ -67,5 +67,5 @@
 <main class="container h-full flex justify-center items-center max-w-7xl mx-auto p-0">
 	<slot />
 </main>
-<Modal />
-<Toast />
+<Modal background="variant-glass-secondary" />
+<Toast position="t" background="variant-glass-secondary" />

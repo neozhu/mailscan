@@ -4,24 +4,36 @@
 	import { invalidateAll } from '$app/navigation';
 	import { applyAction, enhance } from '$app/forms'
  	import { pb } from '$lib/pocketbase'
+	import { getToastStore } from '@skeletonlabs/skeleton';
+	import type { ToastSettings, ToastStore } from '@skeletonlabs/skeleton';
+	const toastStore: ToastStore = getToastStore();
 
 	export let form: ActionData;
 	$: error = form?.error;
 	$: formatError = (key: string) => (error?.code == key ? error.message : '');
-
+	function showToast() {
+		const t: ToastSettings = {
+			message: 'Login successful! Welcome back.',
+			timeout: 4000,
+            background: 'variant-glass-success',
+			hoverable: true
+		};
+		toastStore.trigger(t);
+	}
 </script>
-<div class="py-10 p-0 mx-auto max-w-md">
+<div class="py-20 p-0 mx-auto max-w-md">
 <header class="text-center py-4">
 	<div class="text-center mb-2 text-3xl font-bold">Welcome back!</div>
 	<p class="unstyled text-sm md:text-base opacity-50">
 		Don't have an account yet? <a href="{REGISTER_PATH}">Create account</a>
 	</p>
 </header>
-<div class="card p-6 space-y-6 shadow-xl text-lef">
+<div class="card variant-glass-surface p-6 space-y-6 shadow-xl text-lef">
 	<form class="space-y-4"  method="POST" use:enhance={() => {
 		return async ({ result }) => {
 		  pb.authStore.loadFromCookie(document.cookie)
 		  await applyAction(result)
+		  showToast()
 		}
 	  }} >
 		<label class="label">
