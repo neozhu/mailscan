@@ -1,13 +1,14 @@
 import type { PageServerLoad, Actions } from './$types';
+import { redirect } from '@sveltejs/kit';
 import Tesseract from 'tesseract.js';
 import { NlpManager } from 'node-nlp';
 import natural from 'natural';
-import nlp from 'compromise';
+import { HttpStatusCode } from '$lib/statusCodes';
 
 
 
-export const load = (async () => {
-	return {};
+export const load = (async ({locals}) => {
+	if (!locals.pb.authStore.isValid) throw redirect(HttpStatusCode.SEE_OTHER, '/login');
 }) satisfies PageServerLoad;
 
 /** @type {import('./$types').Actions} */
@@ -66,7 +67,7 @@ export const actions: Actions = {
 			console.log(docentities);
 			console.log('==========================')
 			const tokenizer = new natural.WordTokenizer();
-			let tokens = tokenizer.tokenize(text);
+			const tokens = tokenizer.tokenize(text);
 			console.log(tokens);
 			console.log('==========================')
 		}

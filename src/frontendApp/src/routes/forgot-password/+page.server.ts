@@ -10,14 +10,12 @@ export const load = (async ({ locals }) => {
 }) satisfies PageServerLoad;
 
 interface FormResError {
-	code: FormFieldKey | 'unknown'; // error can be unknown field
+	code: FormFieldKey | 'unknown';
 	message: string;
 }
 enum FormFieldKey {
-	EmailOrUsername = 'emailOrUsername',
-	Password = 'password'
+	Email = 'email',
 }
-
 const makeErrObj = (message = '', code: FormFieldKey | 'unknown' = 'unknown'): FormResError => ({
 	code,
 	message
@@ -26,31 +24,24 @@ export const actions: Actions = {
 	default: async ({ locals, request }) => {
 		const data = Object.fromEntries(await request.formData()) as {
 			email: string;
-			password: string;
 		};
 		// validate emailOrUsername
 		if (!data.email || data.email == '')
 			return fail(HttpStatusCode.BAD_REQUEST, {
-				EmailOrUsername:data.email,
-				error: makeErrObj('Empty email address or username', FormFieldKey.EmailOrUsername)
+				email:data.email,
+				error: makeErrObj('Empty email address', FormFieldKey.Email)
 			});
-		// validate password
-		if (!data.password || data.password == '')
-			return fail(HttpStatusCode.BAD_REQUEST, {
-				EmailOrUsername :data.email,
-				error: makeErrObj('Empty password', FormFieldKey.Password)
-			});
-        
+		
 		try {
-			await locals.pb.collection('users').authWithPassword(data.email, data.password);
+			await locals.pb.collection('users').requestPasswordReset(data.email);
 		} catch (e) {
 			console.error(e);
 			return fail(HttpStatusCode.BAD_REQUEST, {
-				EmailOrUsername:data.email,
+				email:data.email,
 				error: makeErrObj('Incorrect credentials!', 'unknown')
 			});
 		}
 
-		throw redirect(303, '/');
+		throw redirect(303, '/login');
 	}
 };
