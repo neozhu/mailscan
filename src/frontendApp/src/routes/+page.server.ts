@@ -6,14 +6,26 @@ import natural from 'natural';
 import { HttpStatusCode } from '$lib/statusCodes';
 
 
-
+interface NlpEntity {
+    start: number;
+    end: number;
+    len: number;
+    levenshtein: number;
+    accuracy: number;
+    entity: string;
+    type: string;
+    option: string;
+    sourceText: string;
+    utteranceText: string;
+}
 export const load = (async ({locals}) => {
 	if (!locals.pb.authStore.isValid) throw redirect(HttpStatusCode.SEE_OTHER, '/login');
 }) satisfies PageServerLoad;
 
 /** @type {import('./$types').Actions} */
 export const actions: Actions = {
-	process: async ({ request }) => {
+	process: async ({locals, request }) => {
+		const start = performance.now();
 		const acceptLanguageHeader = request.headers.get('accept-language');
 		if(acceptLanguageHeader){
 			const preferredLanguage = acceptLanguageHeader.split(',')[0].split(';')[0];
@@ -26,7 +38,7 @@ export const actions: Actions = {
 			console.log(file);
 			const buffer = await file.arrayBuffer();
 			const worker = await Tesseract.createWorker('eng');
-			const { data: { text } } = await worker.recognize(buffer, { rotateAuto: true });
+			const { data: { text } } = await worker.recognize(buffer);
 			await worker.terminate();
 			console.log(text);
 			// const { data: { text } } = await Tesseract.recognize(buffer, 'eng', {
@@ -43,30 +55,29 @@ export const actions: Actions = {
 				['en'],
 				['Hendry Liguna', 'Bruce Wayne', 'Dr. Strange']
 			);
-			manager.addNamedEntityText(
-				'place',
-				'placeName',
-				['en'],
-				['Karawang 41361, West Java']
-			);
-			manager.addNamedEntityText(
-				'org',
-				'orgName',
-				['en'],
-				['voith', 'Voith', 'VOITH', "AMD"]
-			);
-			manager.addNamedEntityText(
-				'product',
-				'productName',
-				['en'],
-				['GRAPHICS CARD', 'TUF']
-			);
 			const doc = await manager.process('en', text);
-			const entities: String[] = ['person', 'place', 'phonenumber', 'org','product'];
-			const docentities = doc.entities.filter((x:any) => entities.includes(x.entity))
-			console.log(docentities);
+			const labels: string[] = ['person'];
+			const entities:NlpEntity[] = doc.entities;
+			const person = entities.filter((x) => labels.includes(x.entity));
+			if(person && person.length>0){
+				console.log(person);
+			}else{
+				const end = performance.now();
+				const executionTime = ((end - start)/1000).toFixed(5); // 执行时间（毫秒）
+				const scanHistory = {
+					"original_text": text,
+					"elapsed_time": executionTime,
+					"trained": false,
+					"department": null
+				};
+				const record = await locals.pb.collection('scanHistories').create(scanHistory);
+				console.log('create scanhistory',record);
+				return {success:true,record};
+				
+			}
+		
 			console.log('==========================')
-			const tokenizer = new natural.WordTokenizer();
+			const tokenizer = new natural.WordPunctTokenizer();
 			const tokens = tokenizer.tokenize(text);
 			console.log(tokens);
 			console.log('==========================')
