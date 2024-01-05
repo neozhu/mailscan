@@ -10,7 +10,8 @@
 	import { storePopup, AppBar, getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 
-	import { UserCircle, Menu, LogIn, Activity, Airplay } from 'svelte-lucide';
+	import { UserCircle, Menu, LogIn, Github, Airplay } from 'svelte-lucide';
+	import PickWordsForm from '$lib/Components/PickWordsForm.svelte';
 	export let data: LayoutData;
 	$: user = data.user;
 
@@ -43,6 +44,10 @@
 		};
 		modalStore.trigger(modal);
 	};
+
+	const modalComponentRegistry: Record<string, ModalComponent> = {
+		pickWordsForm: { ref: PickWordsForm },
+	};
 </script>
 
 <AppBar background="variant-glass-surface" class="h-20 fixed  top-0 w-full space-y-4 p-4 shadow-2xl z-50">
@@ -53,12 +58,16 @@
 	Mail Scan
 
 	<svelte:fragment slot="trail">
+		<a class="btn-icon hover:variant-soft-primary" href="https://github.com/neozhu/mailscan" target="_blank" rel="noreferrer">
+			<Github/>
+		</a>
+
 		{#if user}
-			<button type="button" class="btn-icon bg-initial" on:click={handleLogout}>
+			<button type="button" class="btn-icon hover:variant-soft-primary" on:click={handleLogout}>
 				<UserCircle /></button
 			>
 		{:else}
-			<a type="button" class="btn bg-initial m-0" href="/login">
+			<a type="button" class="btn-icon hover:variant-soft-primary" href="/login">
 				<LogIn />
 			</a>
 		{/if}
@@ -67,5 +76,5 @@
 <main class="container h-full flex justify-center items-center max-w-7xl mx-auto p-0">
 	<slot />
 </main>
-<Modal background="variant-glass-secondary" />
+<Modal background="variant-glass-secondary" components={modalComponentRegistry}/>
 <Toast position="t" background="variant-glass-secondary" />

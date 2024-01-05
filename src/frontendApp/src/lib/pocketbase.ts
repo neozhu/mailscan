@@ -3,11 +3,14 @@ import type { Admin, Record } from 'pocketbase'
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
 import PocketBase from 'pocketbase';
 import { writable } from 'svelte/store';
+import type { Department } from './type';
 
 
 export const pb = new PocketBase(PUBLIC_POCKETBASE_URL);
 
 export const currentUser = writable<Record | Admin | null>(pb.authStore.model);
+
+export const departments = writable<Department[] | null>(null);
 
 // callback is executed after successfull authentication
 export const initGoogleAuth = async (callback = () => {}) => {

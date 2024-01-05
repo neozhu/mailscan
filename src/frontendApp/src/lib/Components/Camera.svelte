@@ -10,6 +10,7 @@
 		ToastStore
 	} from '@skeletonlabs/skeleton';
 	import { Camera, SwitchCamera,Scan} from 'svelte-lucide';
+	import type { ScanHistory } from '$lib/type';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -43,7 +44,7 @@
 			const toast: ToastSettings = {
 				message: 'start working',
 				timeout: 2000,
-				autohide: true,
+				autohide:true,
 				background: 'variant-glass-surface',
 			};
 			toastStore.trigger(toast);
@@ -118,13 +119,13 @@
 			}, 'image/png');
 		});
 	}
-	function showResult() {
+	function showResult(result:any) {
 		processing = false
 		const modal: ModalSettings = {
-			type: 'alert',
-			// Data
-			title: 'capture camera image',
-			image: screenshotDataURL
+			type: 'component',
+			component: 'pickWordsForm',
+			title: 'Pick words',
+			value:{record:result.record as ScanHistory},
 		};
 		modalStore.trigger(modal);
  
@@ -182,9 +183,8 @@
 			use:enhance={({ formElement, formData, action, cancel }) => {
 				return async ({ result }) => {
 					if (result.type === 'success') {
-						console.log(result);
 						await applyAction(result);
-						showResult();
+						showResult(result.data.record);
 					}
 				};
 			}}
