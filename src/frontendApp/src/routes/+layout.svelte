@@ -76,5 +76,5 @@
 <main class="container h-full flex justify-center items-center max-w-7xl mx-auto p-0">
 	<slot />
 </main>
-<Modal background="variant-glass-secondary" components={modalComponentRegistry}/>
-<Toast position="t" background="variant-glass-secondary" />
+<Modal background="variant-glass-secondary" components={modalComponentRegistry} zIndex="z-[888]"/>
+<Toast position="t" background="variant-glass-secondary" zIndex="z-[999]"/>

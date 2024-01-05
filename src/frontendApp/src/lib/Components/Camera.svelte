@@ -119,16 +119,26 @@
 			}, 'image/png');
 		});
 	}
-	function showResult(result:any) {
-		processing = false
-		const modal: ModalSettings = {
+	function showPickWordsModal(record:any) {
+		
+	    const modal: ModalSettings = {
 			type: 'component',
 			component: 'pickWordsForm',
 			title: 'Pick words',
-			value:{record:result.record as ScanHistory},
+			meta: { record:record }
 		};
 		modalStore.trigger(modal);
- 
+		processing = false
+	}
+	function showNullToasts(){
+		const toast: ToastSettings = {
+				message: 'Sorry, no useful data was detected',
+				timeout: 2000,
+				autohide: true,
+				background: 'variant-glass-error',
+			};
+			toastStore.trigger(toast);
+			processing = false
 	}
 	async function handleCaptureClick() {
 		if (!started) return;
@@ -184,7 +194,15 @@
 				return async ({ result }) => {
 					if (result.type === 'success') {
 						await applyAction(result);
-						showResult(result.data.record);
+						 
+						if(result.data && result.data.record){
+							if(result.data.record.original_text && result.data.record.original_text.length>3){
+								showPickWordsModal(result.data.record);
+							}else{
+								showNullToasts()
+							}
+						}
+						
 					}
 				};
 			}}

@@ -3,22 +3,45 @@ import { redirect } from '@sveltejs/kit';
 import { NlpManager } from 'node-nlp';
 import natural from 'natural';
 import { HttpStatusCode } from '$lib/statusCodes';
-import type { ScanHistory, NlpDocument, NlpEntity, Department, Person } from '$/lib/type';
- import {recognizeText,getLanguageInfo,tokenizer,saveScanHistory} from '$lib/helper';
+import { type ScanHistory, type NlpDocument, type NlpEntity, type Department, type Person } from '$lib/type';
+import { recognizeText, getLanguageInfo, tokenizer, saveScanHistory } from '$lib/helper';
 
 export const load = (async ({ locals }) => {
 	if (!locals.pb.authStore.isValid) throw redirect(HttpStatusCode.SEE_OTHER, '/login');
+	try {
+		const records: Department = await locals.pb.collection('department').getFullList({
+			sort: '-created'
+		});
+		return {
+			departments: records
+		};
+	} catch (err) {
+		console.log(err)
+		return {
+			departments: []
+		};
+	}
 
-	const records: Department = await locals.pb.collection('department').getFullList({
-		sort: '-created'
-	});
-	return {
-		departments: records
-	};
 }) satisfies PageServerLoad;
 
 /** @type {import('./$types').Actions} */
 export const actions: Actions = {
+	addScanHistory: async ({ locals, request }) => {
+		const formData = await request.formData();
+		const data=Object.fromEntries(formData) as {
+			original_text:string,
+			words:string,
+			elapsed_time:number,
+			person_name:string,
+			department:string,
+			lang:string,
+			owner:string
+		}
+		console.log('department:', data.department);
+		data.owner = locals.user?.id;
+		const record = await locals.pb.collection('scanHistories').create(data);
+		console.log('addScanHistory:', record);
+	},
 	process: async ({ locals, request }) => {
 		const start = performance.now();
 		const acceptLanguageHeader = request.headers.get('accept-language');
@@ -53,17 +76,31 @@ export const actions: Actions = {
 					return { success: true, person };
 				} catch (error) {
 					console.log('not found person with name:' + personName);
-					const tokens =await tokenizer(text,language);
+					const tokens = await tokenizer(text, language);
 					const end = performance.now();
 					const executionTime = +((end - start) / 1000).toFixed(5); // 执行时间（毫秒）
-					const record = await saveScanHistory(locals.pb, text, lang,tokens,executionTime);
+					const record:ScanHistory = {
+						original_text: text,
+						words: JSON.stringify(tokens),
+						elapsed_time: executionTime,
+						trained: false,
+						lang: lang,
+				
+					};
 					return { success: true, record };
 				}
 			} else {
-				const tokens = await tokenizer(text,language);
+				const tokens = await tokenizer(text, language);
 				const end = performance.now();
 				const executionTime = +((end - start) / 1000).toFixed(5); // 执行时间（毫秒）
-				const record = await saveScanHistory(locals.pb, text, lang,tokens,executionTime);
+				const record:ScanHistory = {
+					original_text: text,
+					words: JSON.stringify(tokens),
+					elapsed_time: executionTime,
+					trained: false,
+					lang: lang,
+			
+				};
 				return { success: true, record };
 			}
 		}
