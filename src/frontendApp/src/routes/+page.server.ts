@@ -1,15 +1,18 @@
 import type { PageServerLoad, Actions } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { NlpManager } from 'node-nlp';
-import natural from 'natural';
 import { HttpStatusCode } from '$lib/statusCodes';
 import { type ScanHistory, type NlpDocument, type NlpEntity, type Department, type Person } from '$lib/type';
-import { recognizeText, getLanguageInfo, tokenizer, saveScanHistory } from '$lib/helper';
+import textProcessor from '$lib/helper';
+import nlpProcessor from '$lib/NlpProcessor';
+
+ 
 
 export const load = (async ({ locals }) => {
 	if (!locals.pb.authStore.isValid) throw redirect(HttpStatusCode.SEE_OTHER, '/login');
+	await nlpProcessor.initial(locals.pb);
 	try {
-		const records: Department = await locals.pb.collection('department').getFullList({
+		const records: Department[] = await locals.pb.collection('department').getFullList({
 			sort: '-created'
 		});
 		return {
@@ -27,81 +30,68 @@ export const load = (async ({ locals }) => {
 /** @type {import('./$types').Actions} */
 export const actions: Actions = {
 	addScanHistory: async ({ locals, request }) => {
-		const formData = await request.formData();
-		const data=Object.fromEntries(formData) as {
-			original_text:string,
-			words:string,
-			elapsed_time:number,
-			person_name:string,
-			department:string,
-			lang:string,
-			owner:string
-		}
+		const data = Object.fromEntries(await request.formData()) as unknown as {
+			id?: string,
+			original_text: string,
+			person_name?: string,
+			elapsed_time: number,
+			trained: boolean,
+			department?: string,
+			words: string,
+			lang: string,
+			owner: string
+		};
 		console.log('department:', data.department);
+		const person: Person = {
+			name: data.person_name ?? '',
+			email: '',
+			phoneNumber: '',
+			department: data.department,
+			owner: locals.user?.id,
+			lang:data.lang
+		}
 		data.owner = locals.user?.id;
-		const record = await locals.pb.collection('scanHistories').create(data);
-		console.log('addScanHistory:', record);
+		try{
+			const exist:Person=await locals.pb.collection('people').getFirstListItem(`name="${data.person_name}"`) ;
+			exist.department = data.department;
+			const personerecord = await locals.pb.collection('people').update(exist.id!,exist);
+		}catch{
+			const personerecord = await locals.pb.collection('people').create(person);
+		}
+	    await nlpProcessor.addNamedEntityText( locals.pb,'person',data.department??'',[data.lang],[data.person_name??'']);
+		const historyrecord = await locals.pb.collection('scanHistories').create(data);
+		console.log('addScanHistory:', historyrecord);
 	},
 	process: async ({ locals, request }) => {
 		const start = performance.now();
 		const acceptLanguageHeader = request.headers.get('accept-language');
-		const { lang, language } = getLanguageInfo(acceptLanguageHeader);
+		const { lang, language } = textProcessor.getLanguageInfo(acceptLanguageHeader);
 		const data = await request.formData();
 		const file = data.get('image') as File;
 
 		if (file && file instanceof File) {
-			const text = await recognizeText(file, lang);
+			const text = await textProcessor.recognizeText(file, lang);
+		    const personEntities: NlpEntity[] =await nlpProcessor.process(text,language);
 
-			const manager = new NlpManager({ languages: [language], forceNER: true });
-			manager.addNamedEntityText(
-				'person',
-				'personName',
-				['en'],
-				['Hendry Liguna', 'LICAN', 'Dr. Strange']
-			);
-			const doc: NlpDocument = await manager.process(language, text);
-			const labels: string[] = ['person'];
-			const entities: NlpEntity[] = doc.entities;
-			const personEnt: NlpEntity[] = entities.filter((x) => labels.includes(x.entity));
-			if (personEnt && personEnt.length > 0) {
-				const personName = personEnt[0].sourceText;
-				console.log('personName:' + personName);
-				let person: Person;
-				try {
-					const fitler = `name="${personName}"`;
-					person = (await locals.pb.collection('people').getFirstListItem(fitler, {
-						expand: 'department'
-					})) as Person;
-					console.log(person);
-					return { success: true, person };
-				} catch (error) {
-					console.log('not found person with name:' + personName);
-					const tokens = await tokenizer(text, language);
-					const end = performance.now();
-					const executionTime = +((end - start) / 1000).toFixed(5); // 执行时间（毫秒）
-					const record:ScanHistory = {
-						original_text: text,
-						words: JSON.stringify(tokens),
-						elapsed_time: executionTime,
-						trained: false,
-						lang: lang,
-				
-					};
-					return { success: true, record };
-				}
+			if (personEntities && personEntities.length > 0) {
+				const personName = personEntities[0].sourceText;
+				//console.log('personName:',personName)
+				return { success: true, personEntities };
 			} else {
-				const tokens = await tokenizer(text, language);
+				const tokens = await textProcessor.tokenizer(text, language);
 				const end = performance.now();
 				const executionTime = +((end - start) / 1000).toFixed(5); // 执行时间（毫秒）
-				const record:ScanHistory = {
+				const record: ScanHistory = {
 					original_text: text,
+					department: '',
+					person_name: '',
 					words: JSON.stringify(tokens),
 					elapsed_time: executionTime,
 					trained: false,
-					lang: lang,
-			
+					lang: language,
+					owner:locals.user?.id
 				};
-				return { success: true, record };
+				return { success: true,words:tokens.length, record };
 			}
 		}
 		return { success: true };

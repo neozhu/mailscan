@@ -9,8 +9,8 @@
 		ModalStore,
 		ToastStore
 	} from '@skeletonlabs/skeleton';
-	import { Camera, SwitchCamera,Scan} from 'svelte-lucide';
-	import type { ScanHistory } from '$lib/type';
+	import { Camera, SwitchCamera, Scan } from 'svelte-lucide';
+	import type { NlpEntity,ScanHistory } from '$lib/type';
 
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
@@ -44,8 +44,8 @@
 			const toast: ToastSettings = {
 				message: 'start working',
 				timeout: 2000,
-				autohide:true,
-				background: 'variant-glass-surface',
+				autohide: true,
+				background: 'variant-glass-surface'
 			};
 			toastStore.trigger(toast);
 		} catch (err) {
@@ -71,7 +71,7 @@
 				message: 'closed camera',
 				timeout: 2000,
 				autohide: true,
-				background: 'variant-glass-surface',
+				background: 'variant-glass-surface'
 			};
 			toastStore.trigger(toast);
 		}
@@ -119,26 +119,32 @@
 			}, 'image/png');
 		});
 	}
-	function showPickWordsModal(record:any) {
-		
-	    const modal: ModalSettings = {
+	function showPickWordsModal(record: ScanHistory) {
+		const modal: ModalSettings = {
 			type: 'component',
 			component: 'pickWordsForm',
 			title: 'Pick words',
-			meta: { record:record }
+			meta: { record: record }
 		};
 		modalStore.trigger(modal);
-		processing = false
 	}
-	function showNullToasts(){
+	function showResultModal(entities: NlpEntity[]) {
+		const modal: ModalSettings = {
+			type: 'component',
+			component: 'resultForm',
+			title: 'Pick words',
+			meta: { entities: entities }
+		};
+		modalStore.trigger(modal);
+	}
+	function showNullToasts() {
 		const toast: ToastSettings = {
-				message: 'Sorry, no useful data was detected',
-				timeout: 2000,
-				autohide: true,
-				background: 'variant-glass-error',
-			};
-			toastStore.trigger(toast);
-			processing = false
+			message: 'Sorry, no useful data was detected',
+			timeout: 2000,
+			autohide: true,
+			background: 'variant-glass-error'
+		};
+		toastStore.trigger(toast);
 	}
 	async function handleCaptureClick() {
 		if (!started) return;
@@ -149,6 +155,20 @@
 		dataTransfer.items.add(file);
 		fileElement.files = dataTransfer.files;
 		form.requestSubmit();
+	}
+	async function handlerProcessResult(data) {
+		console.log(data);
+		if (data && data.record) {
+			if (data.words > 2) {
+				showPickWordsModal(data.record as ScanHistory);
+			} else {
+				showNullToasts();
+			}
+		} else if (data && data.personEntities) {
+			showResultModal(data.personEntities as NlpEntity[]);
+		}else{
+			showNullToasts();
+		}
 	}
 	async function handleSubmit(event: SubmitEvent & { currentTarget: HTMLFormElement }) {
 		event.preventDefault();
@@ -164,7 +184,7 @@
 		<div class="relative z-30 p-5 text-2xl bg-opacity-50">
 			<button
 				type="button"
-				class="btn   btn-xl bg-gradient-to-br variant-gradient-secondary-tertiary shadow-lg"
+				class="btn btn-xl bg-gradient-to-br variant-gradient-secondary-tertiary shadow-lg"
 				on:click={startCamera}><Scan class="mr-3"></Scan> Start</button
 			>
 		</div>
@@ -194,16 +214,9 @@
 				return async ({ result }) => {
 					if (result.type === 'success') {
 						await applyAction(result);
-						 
-						if(result.data && result.data.record){
-							if(result.data.record.original_text && result.data.record.original_text.length>3){
-								showPickWordsModal(result.data.record);
-							}else{
-								showNullToasts()
-							}
-						}
-						
+						await handlerProcessResult(result.data);
 					}
+					processing = false;
 				};
 			}}
 			method="post"

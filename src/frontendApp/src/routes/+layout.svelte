@@ -12,6 +12,7 @@
 
 	import { UserCircle, Menu, LogIn, Github, Airplay } from 'svelte-lucide';
 	import PickWordsForm from '$lib/Components/PickWordsForm.svelte';
+	import ResultForm from '$lib/Components/ResultForm.svelte';
 	export let data: LayoutData;
 	$: user = data.user;
 
@@ -47,6 +48,7 @@
 
 	const modalComponentRegistry: Record<string, ModalComponent> = {
 		pickWordsForm: { ref: PickWordsForm },
+		resultForm: { ref: ResultForm },
 	};
 </script>
 

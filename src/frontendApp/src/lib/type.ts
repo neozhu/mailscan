@@ -1,15 +1,18 @@
 export interface Department{
-     id:string,
+    id:string,
     name:string,
-    address:string
+    address:string,
+    owner?:string
 }
 export interface Person{
-    id:string,
+    id?:string,
     name:string,
     email?:string,
     phoneNumber?:string,
     department?: string,
-    expand: {
+    owner?:string,
+    lang?:string,
+    expand?: {
         department: Department;
     };
 }
@@ -21,7 +24,8 @@ export interface ScanHistory{
     trained:boolean,
     department?:string,
     words:string,
-    lang:string
+    lang:string,
+    owner?:string
 }
 export interface NlpDocument {
     entities: NlpEntity[];
