@@ -41,7 +41,7 @@ export const actions: Actions = {
 			lang: string,
 			owner: string
 		};
-		console.log('department:', data.department);
+		//console.log('department:', data.department);
 		const person: Person = {
 			name: data.person_name ?? '',
 			email: '',
@@ -60,13 +60,13 @@ export const actions: Actions = {
 		}
 	    await nlpProcessor.addNamedEntityText( locals.pb,'person',data.department??'',[data.lang],[data.person_name??'']);
 		const historyrecord = await locals.pb.collection('scanHistories').create(data);
-		console.log('addScanHistory:', historyrecord);
+		//console.log('addScanHistory:', historyrecord);
 	},
 	process: async ({ locals, request }) => {
 		const start = performance.now();
-		const acceptLanguageHeader = request.headers.get('accept-language');
-		const { lang, language } = textProcessor.getLanguageInfo(acceptLanguageHeader);
 		const data = await request.formData();
+		const defaultLanguage = data.get('lang')?.toString()??'en-US';
+		const { lang, language } = textProcessor.getLanguageInfo(defaultLanguage);
 		const file = data.get('image') as File;
 
 		if (file && file instanceof File) {

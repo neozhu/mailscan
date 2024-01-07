@@ -1,8 +1,7 @@
 <script lang="ts">
 	import '../app.postcss';
-	import { applyAction, enhance } from '$app/forms';
 	import { invalidateAll,goto } from '$app/navigation';
-	import { initializeStores, Modal, Toast } from '@skeletonlabs/skeleton';
+	import { initializeStores, Modal, popup, Toast } from '@skeletonlabs/skeleton';
 	initializeStores();
 	// Floating UI for Popups
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
@@ -10,16 +9,17 @@
 	import { storePopup, AppBar, getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 
-	import { UserCircle, Menu, LogIn, Github, Airplay } from 'svelte-lucide';
+	import { UserCircle, Menu, LogIn, Github, Languages   } from 'svelte-lucide';
+	import {supportLanguages} from '$lib/constant'
+	import{defaultLanguage} from '$lib/stores/language'
 	import PickWordsForm from '$lib/Components/PickWordsForm.svelte';
 	import ResultForm from '$lib/Components/ResultForm.svelte';
+
 	export let data: LayoutData;
 	$: user = data.user;
-
+    defaultLanguage.update((v)=>v = data.acceptLanguageHeader.split(',')[0].split(';')[0])
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
-
-	const modalStore = getModalStore();
-
+	const modalStore:ModalStore = getModalStore();
 	const handleLogout = () => {
 		const modal: ModalSettings = {
 			type: 'confirm',
@@ -57,12 +57,40 @@
 		<Menu class="h-6 w-6 text-blue-500" />
 	</svelte:fragment>
 
-	Mail Scan
+	<h4 class="h4">
+		<span class="bg-gradient-to-br from-blue-500 to-cyan-300 bg-clip-text text-transparent box-decoration-clone">Mail Scan Kit</span>
+	</h4>
 
 	<svelte:fragment slot="trail">
 		<a class="btn-icon hover:variant-soft-primary" href="https://github.com/neozhu/mailscan" target="_blank" rel="noreferrer">
 			<Github/>
 		</a>
+
+		<!-- Set Language -->
+		<div>
+			<!-- trigger -->
+			<button class="btn hover:variant-soft-primary" use:popup={{ event: 'click', target: 'sponsor' }}>
+				<span><Languages size="24"></Languages></span>
+				<span class="hidden md:inline-block">{supportLanguages[$defaultLanguage]}</span>
+			</button>
+			<!-- popup -->
+			<div class="card variant-glass-surfac p-4  shadow-xl" data-popup="sponsor">
+				<div class="space-y-4">
+					<nav class="list-nav ">
+						<ul>
+							{#each Object.keys(supportLanguages) as lang}
+							<li>
+								<button type="button" on:click={()=>defaultLanguage.update((n)=>n=lang)}>
+									<span>{supportLanguages[lang]}</span>
+								</button>
+							</li>
+							{/each}
+						</ul>
+					</nav>
+					 
+				</div>
+			</div>
+		</div>
 
 		{#if user}
 			<button type="button" class="btn-icon hover:variant-soft-primary" on:click={handleLogout}>
