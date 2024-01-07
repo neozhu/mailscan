@@ -115,8 +115,8 @@
 </script>
 
 <div class="t-10 my-20">
-	<div class="card variant-glass-surface">
-		<header class="card-header flex justify-end static p-4">
+	<div class="card variant-glass-surface relative">
+		<header class="card-header flex justify-end relative p-4">
 			<button
 				class="btn-icon hover:variant-soft-primary absolute top-0 right-0"
 				on:click={parent.onClose}><XCircle /></button

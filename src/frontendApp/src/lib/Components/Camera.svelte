@@ -238,6 +238,7 @@
 		{#if multipleCamerasAvailable}
 			<button
 				type="button"
+				disabled={!started}
 				class="btn-icon space-x-3 bg-gradient-to-br variant-gradient-tertiary-primary btn-icon-xl variant-filled"
 				on:click={toggleCamera}><SwitchCamera size="32"></SwitchCamera></button
 			>
