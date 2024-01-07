@@ -24,6 +24,10 @@ Built with the latest .NET 8 framework, MailScan combines robust performance wit
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
 ```bash
+# set PocketBase URL in .env
+PUBLIC_POCKETBASE_URL=http://10.33.1.166:3010/
+BODY_SIZE_LIMIT=5291456  # 5mb
+
 npm run dev
 
 # or start the server and open the app in a new browser tab
