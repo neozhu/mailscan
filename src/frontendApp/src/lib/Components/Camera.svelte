@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { enhance, applyAction } from '$app/forms';
 	import { getModalStore, SlideToggle, getToastStore } from '@skeletonlabs/skeleton';
+	import {defaultLanguage} from '$lib/stores/language'
 	import type {
 		ToastSettings,
 		ModalSettings,
@@ -23,6 +24,7 @@
 	let multipleCamerasAvailable: boolean = false;
 	let processing: boolean = false;
 	let screenshotDataURL: string;
+	$:lang = $defaultLanguage;
 	onMount(async () => {
 		const devices = await navigator.mediaDevices.enumerateDevices();
 		const videoInputs = devices.filter((device) => device.kind === 'videoinput');
@@ -224,6 +226,7 @@
 			on:submit|preventDefault={handleSubmit}
 		>
 			<input type="file" style="display: none;" name="image" bind:this={fileElement} />
+			<input type="hidden" name="lang" bind:value={lang}/>
 			<button
 				on:click={handleCaptureClick}
 				disabled={!started}

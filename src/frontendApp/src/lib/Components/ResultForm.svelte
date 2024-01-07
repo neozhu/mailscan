@@ -55,7 +55,7 @@
 				<h6 class="h6 my-1.5" data-toc-ignore="">
 					Below is the recognized information:  
 				</h6>
-				<article class="gap-1 overflow-y-auto focus:overscroll-contain overscroll-auto max-h-28">
+				<article class="gap-1 overflow-y-auto focus:overscroll-contain overscroll-auto max-h-40">
 					<dl class="list-dl">
 						{#each records as person}
 						<div>

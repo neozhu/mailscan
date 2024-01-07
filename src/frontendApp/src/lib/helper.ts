@@ -21,29 +21,29 @@ class TextProcessor {
         'zh-CN': 'zh',
     };
 
-    public getLanguageInfo(acceptLanguageHeader: string | null): LanguageInfo {
+    public getLanguageInfo(defaultLanguage: string | null): LanguageInfo {
         let lang = 'eng';
         let language = 'en';
-        if (acceptLanguageHeader) {
-            const preferredLanguage = acceptLanguageHeader.split(',')[0].split(';')[0];
-            if (preferredLanguage in this.langMap) {
-                lang = this.langMap[preferredLanguage];
+        if (defaultLanguage) {
+            if (defaultLanguage in this.langMap) {
+                lang = this.langMap[defaultLanguage];
             }
-            if(preferredLanguage in this.languageMap){
-                language = this.languageMap[preferredLanguage];
+            if(defaultLanguage in this.languageMap){
+                language = this.languageMap[defaultLanguage];
             }
         }
         return { lang, language };
     }
 
     public async recognizeText(file: File, lang: string): Promise<string> {
-        const langs: Tesseract.Lang[] = [lang as unknown as Tesseract.Lang];
+        const langs: Tesseract.Lang[] = [lang];
         const buffer = await file.arrayBuffer();
         const worker = await Tesseract.createWorker(langs);
         const {
             data: { text }
         } = await worker.recognize(buffer);
         await worker.terminate();
+        console.log('txt',text);
         return text;
     }
 
