@@ -15,23 +15,31 @@ Built with the latest .NET 8 framework, MailScan combines robust performance wit
 ## Getting Started
 
 ### Prerequisites
-- .NET 8 SDK
-- A compatible web browser
-- A camera-equipped device for scanning
+- sveltekit
+- PocketBase
 
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/neozhu/mailscan
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd MailScan
-   ```
-3. Run the application:
-   ```bash
-   dotnet run
-   ```
+
+## Developing
+
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+
+```bash
+npm run dev
+
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
+```
+
+## Building
+
+To create a production version of your app:
+
+```bash
+npm run build
+```
+
+You can preview the production build with `npm run preview`.
+
 
 ### Usage
 1. Open the app in a web browser.
@@ -47,10 +55,7 @@ Built with the latest .NET 8 framework, MailScan combines robust performance wit
 4. Database Lookup: It uses these names to search a database for the employee's details, including their department and office address.
 
 ## Technologies Used
-- Blazor Server Application
-- .NET 8
-- Optical Character Recognition (OCR) technology
-- Tesseract 5
+- Type Script
 - Docker
 
 ## Contributing
