@@ -1,6 +1,7 @@
 import PocketBase from 'pocketbase';
 import { NlpManager } from 'node-nlp';
 import { languages } from './helper';
+
 import type { Person, NlpDocument, NlpEntity, Department } from '$lib/type'
 
 export const nlp = new NlpManager({ languages: languages, forceNER: true });
@@ -34,7 +35,7 @@ class NlpProcessor {
                     languages.add(person.lang == '' ? 'en' : person.lang);
                 });
                 let label: string = 'person';
-                console.log('addNamedEntityText', label, category, [...languages], keywords)
+                //console.log('addNamedEntityText', label, category, [...languages], keywords)
                 nlp.addNamedEntityText(label, category, [...languages], keywords);
             });
             this.initialized=true;
@@ -46,7 +47,7 @@ class NlpProcessor {
 
     public async process(text: string, language: string = 'en'): Promise<NlpEntity[]> {
         const doc: NlpDocument = await nlp.process(language, text);
-        console.log('doc', doc)
+        //console.log('doc', doc)
         const labels: string[] = ['person'];
         const entities: NlpEntity[] = doc.entities;
         const personEntities: NlpEntity[] = entities.filter((x) => labels.includes(x.entity));

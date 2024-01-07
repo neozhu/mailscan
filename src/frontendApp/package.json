@@ -48,6 +48,7 @@
     "natural": "^6.10.4",
     "node-nlp": "^4.27.0",
     "node-nlp-typescript": "^1.0.3",
+    "novel-segment": "^2.7.116",
     "pocketbase": "^0.20.1",
     "tesseract.js": "^5.0.4"
   }

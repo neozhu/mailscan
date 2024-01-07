@@ -1,6 +1,7 @@
 import Tesseract from "tesseract.js";
 import natural from 'natural';
-
+import Segment from 'novel-segment'
+import type {WordEntry} from '$lib/type'
 export type LanguageInfo = {
     lang: string;
     language: string;
@@ -43,15 +44,17 @@ class TextProcessor {
             data: { text }
         } = await worker.recognize(buffer);
         await worker.terminate();
-        console.log('txt',text);
+        //console.log('txt',text);
         return text;
     }
 
     public async tokenizer(text: string, lang: string): Promise<string[]> {
         let tokens: string[];
-        if(lang=='ch'){
-            const tokenizer = new natural.WordTokenizer();
-            tokens = tokenizer.tokenize(text) as string[];
+         if(lang=='zh'){
+            const  tokenizer =new  Segment();
+            tokenizer.useDefault();
+            const result:WordEntry[] = tokenizer.doSegment(text.replace(/\s+/g, ''));
+            tokens =  result.map(item => item.w);
         } else if(lang=='de'){
             const tokenizer = new natural.AggressiveTokenizerDe();
             tokens = tokenizer.tokenize(text)as string[];
