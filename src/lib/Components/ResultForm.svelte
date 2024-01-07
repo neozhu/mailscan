@@ -7,6 +7,7 @@
 		getToastStore,
 		type ToastSettings,
 		type ModalStore,
+		type ModalSettings,
 		type ToastStore
 	} from '@skeletonlabs/skeleton';
 	import type { NlpEntity } from '$lib/type';
@@ -15,11 +16,27 @@
 	const toastStore: ToastStore = getToastStore();
 	export let parent: SvelteComponent;
 	let records: NlpEntity[] = $modalStore[0].meta.entities;
-	console.log($modalStore[0].meta.entities);
 	async function removeEntityHandler(person: NlpEntity) {
-		console.log(person);
 		if (intervalId) {
 			clearInterval(intervalId);
+		}
+		if (confirm('Are you sure you want to delete?') == true) {
+			await removeKeywords(person);
+		}
+	}
+	async function removeKeywords(person: NlpEntity) {
+		const formData = new FormData();
+		formData.append('entity', person.entity);
+		formData.append('option', person.option);
+		formData.append('sourceText', person.sourceText);
+		const response = await fetch('?/removeKeywords', {
+			method: 'POST',
+			body: formData
+		});
+		if (response.ok) {
+			records = records.filter((x) => x.sourceText != person.sourceText);
+		} else {
+			console.error('Error removing keywords');
 		}
 	}
 	let count = 4;

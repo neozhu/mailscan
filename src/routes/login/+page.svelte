@@ -33,7 +33,7 @@
 		return async ({ result }) => {
 		  pb.authStore.loadFromCookie(document.cookie)
 		  await applyAction(result)
-		  showToast()
+		  if(result.type==='redirect') showToast()
 		}
 	  }} >
 		<label class="label">

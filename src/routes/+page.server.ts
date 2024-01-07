@@ -6,7 +6,7 @@ import { type ScanHistory, type NlpDocument, type NlpEntity, type Department, ty
 import textProcessor from '$lib/helper';
 import nlpProcessor from '$lib/NlpProcessor';
 
- 
+
 
 export const load = (async ({ locals }) => {
 	if (!locals.pb.authStore.isValid) throw redirect(HttpStatusCode.SEE_OTHER, '/login');
@@ -29,6 +29,36 @@ export const load = (async ({ locals }) => {
 
 /** @type {import('./$types').Actions} */
 export const actions: Actions = {
+	removeKeywords: async ({ locals, request }) => {
+		const data: NlpEntity = Object.fromEntries(await request.formData()) as unknown as {
+			start: number;
+			end: number;
+			len: number;
+			levenshtein: number;
+			accuracy: number;
+			entity: string;
+			type: string;
+			option: string;
+			sourceText: string;
+			utteranceText: string;
+		};
+		if (data.option.includes('|')) {
+			const name = data.option.split('|')[0].trim();
+			const address = data.option.split('|')[1].trim();
+			const label='person';
+			try{
+				const record:Department =await locals.pb.collection('department').getFirstListItem(`name="${name}" && address="${address}"`);
+				const result = await locals.pb.collection('people').getList(1,50,{filter:`name="${data.sourceText}" && department="${record.id}"`});
+				result.items.forEach(async (item)=>{
+					const p:Person=item as unknown as Person;
+					await nlpProcessor.removeNamedEntityText(locals.pb,label,record.id,[p.lang??'en'],[p.name])
+					await locals.pb.collection('people').delete(item.id!);
+				});
+			}catch(error){
+				console.log('removeKeywords:',error);
+			}
+		}
+	},
 	addScanHistory: async ({ locals, request }) => {
 		const data = Object.fromEntries(await request.formData()) as unknown as {
 			id?: string,
@@ -48,30 +78,30 @@ export const actions: Actions = {
 			phoneNumber: '',
 			department: data.department,
 			owner: locals.user?.id,
-			lang:data.lang
+			lang: data.lang
 		}
 		data.owner = locals.user?.id;
-		try{
-			const exist:Person=await locals.pb.collection('people').getFirstListItem(`name="${data.person_name}"`) ;
+		try {
+			const exist: Person = await locals.pb.collection('people').getFirstListItem(`name="${data.person_name}"`);
 			exist.department = data.department;
-			const personerecord = await locals.pb.collection('people').update(exist.id!,exist);
-		}catch{
+			const personerecord = await locals.pb.collection('people').update(exist.id!, exist);
+		} catch {
 			const personerecord = await locals.pb.collection('people').create(person);
 		}
-	    await nlpProcessor.addNamedEntityText( locals.pb,'person',data.department??'',[data.lang],[data.person_name??'']);
+		await nlpProcessor.addNamedEntityText(locals.pb, 'person', data.department ?? '', [data.lang], [data.person_name ?? '']);
 		const historyrecord = await locals.pb.collection('scanHistories').create(data);
 		//console.log('addScanHistory:', historyrecord);
 	},
 	process: async ({ locals, request }) => {
 		const start = performance.now();
 		const data = await request.formData();
-		const defaultLanguage = data.get('lang')?.toString()??'en-US';
+		const defaultLanguage = data.get('lang')?.toString() ?? 'en-US';
 		const { lang, language } = textProcessor.getLanguageInfo(defaultLanguage);
 		const file = data.get('image') as File;
 
 		if (file && file instanceof File) {
 			const text = await textProcessor.recognizeText(file, lang);
-		    const personEntities: NlpEntity[] =await nlpProcessor.process(text,language);
+			const personEntities: NlpEntity[] = await nlpProcessor.process(text, language);
 
 			if (personEntities && personEntities.length > 0) {
 				const personName = personEntities[0].sourceText;
@@ -89,9 +119,9 @@ export const actions: Actions = {
 					elapsed_time: executionTime,
 					trained: false,
 					lang: language,
-					owner:locals.user?.id
+					owner: locals.user?.id
 				};
-				return { success: true,words:tokens.length, record };
+				return { success: true, words: tokens.length, record };
 			}
 		}
 		return { success: true };
