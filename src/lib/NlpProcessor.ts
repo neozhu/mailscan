@@ -51,7 +51,7 @@ class NlpProcessor {
         const labels: string[] = ['person'];
         const entities: NlpEntity[] = doc.entities;
         const personEntities: NlpEntity[] = entities.filter((x) => labels.includes(x.entity));
-        console.log('personEntities', personEntities)
+        //console.log('personEntities', personEntities)
         return personEntities;
     }
 

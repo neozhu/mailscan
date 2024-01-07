@@ -159,7 +159,7 @@
 		form.requestSubmit();
 	}
 	async function handlerProcessResult(data) {
-		console.log(data);
+		//console.log(data);
 		if (data && data.record) {
 			if (data.words > 2) {
 				showPickWordsModal(data.record as ScanHistory);

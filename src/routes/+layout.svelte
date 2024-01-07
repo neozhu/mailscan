@@ -3,7 +3,7 @@
 	import { invalidateAll,goto } from '$app/navigation';
 	import { initializeStores, Modal, popup, Toast } from '@skeletonlabs/skeleton';
 	initializeStores();
-	// Floating UI for Popups
+	// Floating UI                                                  for Popups
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import type { LayoutData } from './$types';
 	import { storePopup, AppBar, getModalStore } from '@skeletonlabs/skeleton';
@@ -49,7 +49,7 @@
 	const modalComponentRegistry: Record<string, ModalComponent> = {
 		pickWordsForm: { ref: PickWordsForm },
 		resultForm: { ref: ResultForm },
-	};
+	};             
 </script>
 
 <AppBar background="variant-glass-surface" class="h-20 fixed  top-0 w-full space-y-4 p-4 shadow-2xl z-50">
