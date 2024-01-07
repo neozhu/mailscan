@@ -1,5 +1,5 @@
 # MailScan - Blazor Server App for Efficient Mail Sorting
-
+[![Build](https://github.com/neozhu/mailscan/actions/workflows/node.js.yml/badge.svg)](https://github.com/neozhu/mailscan/actions/workflows/node.js.yml)
 ## Overview
 MailScan is a cutting-edge Blazor Server application, tailored for optimizing mail sorting processes. Utilizing advanced camera scanning and text recognition technologies, this app is designed to enhance the efficiency of mail delivery systems. By scanning envelopes and identifying recipient details, MailScan assists sorting personnel in categorizing mail based on the recipient's department and office location.
 
