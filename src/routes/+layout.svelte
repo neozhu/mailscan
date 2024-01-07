@@ -9,7 +9,7 @@
 	import { storePopup, AppBar, getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 
-	import { UserCircle, Menu, LogIn, Github, Languages   } from 'svelte-lucide';
+	import { UserCircle, Menu, LogIn, Github, Languages, Cog   } from 'svelte-lucide';
 	import {supportLanguages} from '$lib/constant'
 	import{defaultLanguage} from '$lib/stores/language'
 	import PickWordsForm from '$lib/Components/PickWordsForm.svelte';
@@ -52,7 +52,7 @@
 	};             
 </script>
 
-<AppBar background="variant-glass-surface" class="h-20 fixed  top-0 w-full space-y-4 p-4 shadow-2xl z-50">
+<AppBar background="variant-glass-surface"    slotTrail="space-x-1 place-content-end"  class="h-20 fixed space-x-1 top-0 w-full space-y-1 p-4 shadow-2xl z-50" >
 	<svelte:fragment slot="lead">
 		<Menu class="h-6 w-6 text-blue-500" />
 	</svelte:fragment>
@@ -61,17 +61,19 @@
 		<span class="bg-gradient-to-br from-blue-500 to-cyan-300 bg-clip-text text-transparent box-decoration-clone">Mail Scan Kit</span>
 	</h4>
 
-	<svelte:fragment slot="trail">
-		<a class="btn-icon hover:variant-soft-primary" href="https://github.com/neozhu/mailscan" target="_blank" rel="noreferrer">
+	<svelte:fragment slot="trail" >
+		
+
+		<a class="hidden md:flex btn-icon hover:variant-soft-primary" href="https://github.com/neozhu/mailscan" target="_blank" rel="noreferrer">
 			<Github/>
 		</a>
 
 		<!-- Set Language -->
 		<div>
 			<!-- trigger -->
-			<button class="btn hover:variant-soft-primary" use:popup={{ event: 'click', target: 'sponsor' }}>
+			<button class="btn   hover:variant-soft-primary" type="button" use:popup={{ event: 'click', target: 'sponsor' }}>
 				<span><Languages size="24"></Languages></span>
-				<span class="hidden md:inline-block">{supportLanguages[$defaultLanguage]}</span>
+				<span class="hidden md:block">{supportLanguages[$defaultLanguage]}</span>
 			</button>
 			<!-- popup -->
 			<div class="card variant-glass-surfac p-4  shadow-xl" data-popup="sponsor">
@@ -91,7 +93,9 @@
 				</div>
 			</div>
 		</div>
-
+		<button type="button" class="btn-icon hover:variant-soft-primary">
+			<Cog /></button
+		>
 		{#if user}
 			<button type="button" class="btn-icon hover:variant-soft-primary" on:click={handleLogout}>
 				<UserCircle /></button
