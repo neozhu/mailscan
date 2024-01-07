@@ -14,5 +14,5 @@ COPY --from=build /app/build .
 RUN yarn install --production && \
   yarn cache clean
 ENV PUBLIC_POCKETBASE_URL=http://10.33.1.166:3010
-ENV BODY_SIZE_LIMIT=651160
+ENV BODY_SIZE_LIMIT=5291456     
 CMD ["node", "index.js"]
