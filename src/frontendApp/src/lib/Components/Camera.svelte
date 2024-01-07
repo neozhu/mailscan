@@ -108,7 +108,7 @@
 				canvasElement.width,
 				canvasElement.height
 			);
-			screenshotDataURL = canvasElement.toDataURL('image/png');
+			// screenshotDataURL = canvasElement.toDataURL('image/jpeg');
 			// 获取图片数据
 			canvasElement.toBlob((blob) => {
 				if (blob && blob instanceof Blob) {
@@ -116,7 +116,7 @@
 				} else {
 					reject(new Error('Failed to extract blob from canvas'));
 				}
-			}, 'image/png');
+			}, 'image/jpeg',0.8);
 		});
 	}
 	function showPickWordsModal(record: ScanHistory) {
@@ -150,7 +150,7 @@
 		if (!started) return;
 		processing = true;
 		const imageBlob = await captureCamera();
-		const file = new File([imageBlob] as BlobPart[], 'image.png', { type: 'image/png' });
+		const file = new File([imageBlob] as BlobPart[], 'image.jpeg', { type: 'image/jpeg' });
 		const dataTransfer = new DataTransfer();
 		dataTransfer.items.add(file);
 		fileElement.files = dataTransfer.files;
@@ -201,7 +201,7 @@
 	{/if}
 	<video
 		bind:this={videoElement}
-		autoplay
+		autoplay muted webkit-playsinline playsinline
 		class="absolute object-cover z-10 w-auto w-screen h-screen max-w-none"
 	>
 		<track kind="captions" srclang="en" label="English" />
