@@ -14,6 +14,7 @@
 	import{defaultLanguage} from '$lib/stores/language'
 	import PickWordsForm from '$lib/Components/PickWordsForm.svelte';
 	import ResultForm from '$lib/Components/ResultForm.svelte';
+	import SettingClassification from '$lib/Components/SettingClassification.svelte';
 
 	export let data: LayoutData;
 	$: user = data.user;
@@ -45,10 +46,17 @@
 		};
 		modalStore.trigger(modal);
 	};
-
+	function handleSetting(){
+		const modal: ModalSettings = {
+			type: 'component',
+			component: 'settingClassification',
+		};
+		modalStore.trigger(modal);
+	}
 	const modalComponentRegistry: Record<string, ModalComponent> = {
 		pickWordsForm: { ref: PickWordsForm },
 		resultForm: { ref: ResultForm },
+		settingClassification: { ref: SettingClassification },
 	};             
 </script>
 
@@ -93,10 +101,11 @@
 				</div>
 			</div>
 		</div>
-		<button type="button" class="btn-icon hover:variant-soft-primary">
-			<Cog /></button
-		>
+		
+		
 		{#if user}
+			<button type="button" class="btn-icon hover:variant-soft-primary" on:click={handleSetting}>
+			<Cog /></button>
 			<button type="button" class="btn-icon hover:variant-soft-primary" on:click={handleLogout}>
 				<UserCircle /></button
 			>
