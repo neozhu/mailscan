@@ -161,7 +161,7 @@
 									? 'bg-gradient-to-br variant-gradient-secondary-primary'
 									: 'variant-soft'}"
 								on:click={() => {
-									toggleWordsHandler(w);
+									toggleWordsHandler(w.trim());
 								}}
 								on:keypress
 							>

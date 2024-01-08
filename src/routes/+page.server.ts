@@ -88,8 +88,12 @@ export const actions: Actions = {
 			owner: string
 		};
 		//console.log('department:', data.department);
+		let keywords=data.person_name;
+		if(data.lang=='zh' && data.person_name){
+			keywords=data.person_name.replace(/\s+/g, '');
+		}
 		const person: Person = {
-			name: data.person_name ?? '',
+			name: keywords ?? '',
 			email: '',
 			phoneNumber: '',
 			department: data.department,
