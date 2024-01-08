@@ -42,3 +42,7 @@ export interface NlpEntity {
 	sourceText: string;
 	utteranceText: string;
 }
+export interface WordEntry{
+    w:string,
+    p: number;
+}
