@@ -3,7 +3,7 @@
 	import { applyAction, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { Check, Save, XCircle } from 'svelte-lucide';
-	import { departments } from '$lib/pocketbase';
+	import { departments } from '$lib/stores/department';
 	import {
 		getModalStore,
 		getToastStore,
@@ -129,7 +129,7 @@
 			on:submit|preventDefault={handleSubmit}
 			use:enhance={() => {
 				return async ({ result }) => {
-					console.log(result);
+					//console.log(result);
 					if (result.type === 'success') {
 						await applyAction(result);
 						parent.onClose();

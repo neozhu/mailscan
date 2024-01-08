@@ -29,6 +29,22 @@ export const load = (async ({ locals }) => {
 
 /** @type {import('./$types').Actions} */
 export const actions: Actions = {
+	createClassification: async({ locals, request })=>{
+		const data:Department = Object.fromEntries(await request.formData()) as unknown as {
+			 id:string,
+			 name:string,
+			 address:string,
+			 owner?:string
+		};
+		data.owner = locals.user?.id;
+		const result = await locals.pb.collection('department').create(data);
+		return {data:result}
+	},
+	deleteClassification:async({ locals, request })=>{
+		const data = await request.formData();
+		const id=data.get('id')?.toString();
+		await locals.pb.collection('department').delete(id!);
+	},
 	removeKeywords: async ({ locals, request }) => {
 		const data: NlpEntity = Object.fromEntries(await request.formData()) as unknown as {
 			start: number;
