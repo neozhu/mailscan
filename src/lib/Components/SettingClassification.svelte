@@ -48,7 +48,7 @@
 			return false;
 		}
 	}
-	function handleCreateResult(dep: Department) {
+	function handleCreatedResult(dep: Department) {
 		records.unshift(dep);
 		records=records;
 		departments.set(records);
@@ -79,7 +79,7 @@
 						saving=false
 						if (result.type === 'success') {
 							if(result.data && result.data.data){
-								handleCreateResult(result.data.data);
+								handleCreatedResult(result.data.data);
 							}
 							await applyAction(result);
 						}
