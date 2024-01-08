@@ -45,6 +45,9 @@ class TextProcessor {
         } = await worker.recognize(buffer);
         await worker.terminate();
         //console.log('txt',text);
+        if(lang=='chi_sim'){
+            return text.replace(/\s+/g, '')
+        }
         return text;
     }
 
