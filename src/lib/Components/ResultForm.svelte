@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import {defaultLanguage} from '$lib/stores/language';
 	import type { SvelteComponent } from 'svelte';
 	import { XCircle, ArrowRight, MailSearch, Trash2 } from 'svelte-lucide';
 	import {
@@ -11,7 +12,11 @@
 		type ToastStore
 	} from '@skeletonlabs/skeleton';
 	import type { NlpEntity } from '$lib/type';
-
+	let languageMap: Record<string, string> = {
+        'en-US': 'en',
+        'de-DE': 'de',
+        'zh-CN': 'zh',
+    };
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
 	export let parent: SvelteComponent;
@@ -26,9 +31,13 @@
 	}
 	async function removeKeywords(person: NlpEntity) {
 		const formData = new FormData();
+		const lang = languageMap[$defaultLanguage];
+		console.log(lang)
 		formData.append('entity', person.entity);
 		formData.append('option', person.option);
 		formData.append('sourceText', person.sourceText);
+		formData.append('utteranceText', person.utteranceText);
+		formData.append('lang', lang);
 		const response = await fetch('?/removeKeywords', {
 			method: 'POST',
 			body: formData
@@ -56,6 +65,11 @@
 			clearInterval(intervalId);
 		}
 	});
+	function scrollHandler(){
+		if (intervalId) {
+			clearInterval(intervalId);
+		}
+	}
 </script>
 
 <div class="w-modal-wide t-10 my-20">
@@ -69,14 +83,14 @@
 
 		<section class="p-4">
 			<h6 class="h6 my-1.5" data-toc-ignore="">Below is the recognized information:</h6>
-			<article class="gap-1 overflow-y-auto focus:overscroll-contain overscroll-auto max-h-40">
+			<article class="gap-1 overflow-y-auto focus:overscroll-contain overscroll-auto max-h-40" on:scroll={scrollHandler} on:mousemove={scrollHandler}>
 				<dl class="list-dl">
 					{#each records as person}
 						<div>
 							<span class="p-4"><MailSearch /></span>
 							<span class="flex-auto">
-								<dt class="font-bold">{person.option}</dt>
-								<dd class="text-sm opacity-50">keywords: {person.sourceText}</dd>
+								<dt class="font-bold antialiased text-lg">{person.entity} {person.option}</dt>
+								<dd class="text-sm opacity-50">keywords: {person.utteranceText} accuracy: {person.accuracy.toFixed(2)}</dd>
 							</span>
 							<button
 								type="button"

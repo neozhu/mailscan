@@ -1,82 +1,87 @@
-import PocketBase from 'pocketbase';
 import { NlpManager } from 'node-nlp';
 import { languages } from './helper';
+import { pb } from '$lib/pocketbase';
+import type { NlpDocument, NlpEntity, Entity } from '$lib/type';
 
-import type { Person, NlpDocument, NlpEntity, Department } from '$lib/type'
-
-export const nlp = new NlpManager({ languages: languages, forceNER: true });
+export const nlp = new NlpManager({
+	languages: languages,
+	forceNER: true,
+	ner: { threshold: 0.8 }
+});
 class NlpProcessor {
-    private initialized = false;
-    public async initial(pb: PocketBase): Promise<boolean> {
-        if (this.initialized) {
-            return false;
-        }
-        try {
-            const records: Person[] = await pb.collection('people').getFullList({
-                sort: '-created',
-                expand: 'department'
-            });
-            const groupedByDepartment: Record<string, Person[]> = records.reduce((acc, person) => {
-                const dept: string = person.department ?? '';
-                if (!acc[dept]) {
-                    acc[dept] = [];
-                }
-                acc[dept].push(person);
-                return acc;
-            }, {});
-            Object.keys(groupedByDepartment).forEach(department => {
-                const category = `${groupedByDepartment[department][0].expand.department.name} | ${groupedByDepartment[department][0].expand.department.address}`;
-                //const category = `${groupedByDepartment[department][0].expand.department.name}`;
-                let keywords: string[] = [];
-                let languages: Set<string> = new Set<string>();
+	private initialized = false;
+	private labels = new Set<string>();
+	public async initial(): Promise<boolean> {
+		if (this.initialized) {
+			return false;
+		}
+		try {
+			const entities: Entity[] = await pb.collection('entities').getFullList({
+				sort: '-created',
+				expand: 'department'
+			});
+			for (const en of entities) {
+				const keywords = en.keywords
+					.split(',')
+					.map((s) => s.trim())
+					.filter((x) => x.length > 0);
+				nlp.addNamedEntityText(en.name, en.option, [en.lang], keywords);
+				this.labels.add(en.name);
+				console.log('addNamedEntityText', en.name, en.option, [en.lang], keywords);
+			}
 
-                groupedByDepartment[department].forEach(person => {
-                    keywords.push(person.name);
-                    languages.add(person.lang == '' ? 'en' : person.lang);
-                });
-                let label: string = 'person';
-                //console.log('addNamedEntityText', label, category, [...languages], keywords)
-                nlp.addNamedEntityText(label, category, [...languages], keywords);
-            });
-            this.initialized=true;
-        } catch (error) {
-            console.log('NlpProcessor.initial', error)
-        }
-        return true;
-    }
+			this.initialized = true;
+		} catch (error) {
+			console.log('NlpProcessor.initial', error);
+		}
+		return true;
+	}
 
-    public async process(text: string, language: string = 'en'): Promise<NlpEntity[]> {
-        const doc: NlpDocument = await nlp.process(language, text);
-        //console.log('doc', doc)
-        const labels: string[] = ['person'];
-        const entities: NlpEntity[] = doc.entities;
-        const personEntities: NlpEntity[] = entities.filter((x) => labels.includes(x.entity));
-        //console.log('personEntities', personEntities)
-        return personEntities;
-    }
+	public async process(text: string, language: string = 'en'): Promise<NlpEntity[]> {
+		const doc: NlpDocument = await nlp.process(language, text);
+		//console.log('doc', doc)
+		const labels: string[] = [...this.labels];
+		const entities: NlpEntity[] = doc.entities;
+		const personEntities: NlpEntity[] = entities.filter((x) => labels.includes(x.entity));
+		//console.log('process result:', personEntities)
+		const unique = new Set();
+		const filteredResults = personEntities.filter((record) => {
+			const key = `${record.entity}_${record.option}`;
+			if (unique.has(key)) {
+				return false;
+			}
+			unique.add(key);
+			return true;
+		});
+		return filteredResults;
+	}
 
-    public async addNamedEntityText(db:PocketBase,label: string, departmentId: string, languages: string[] = ['en'], keywords: string[]) {
-        let category='';
-        try{
-            const record:Department = await db.collection('department').getOne(departmentId);
-            category = `${record.name} | ${record.address}`;
-            nlp.addNamedEntityText(label, category, languages, keywords);
-            //console.log('addNamedEntityText',label, category, languages, keywords)
-        }catch(error){
-            console.log('addNamedEntityText:',error);
-        }
-    }
-    public async removeNamedEntityText(db:PocketBase,label: string, departmentId: string, languages: string[] = ['en'], keywords: string[]) {
-        let category='';
-        try{
-            const record:Department = await db.collection('department').getOne(departmentId);
-            category = `${record.name} | ${record.address}`;
-            nlp.removeNamedEntityText(label, category, languages, keywords);
-            //console.log('removeNamedEntityText',label, category, languages, keywords)
-        }catch(error){
-            console.log('addNamedEntityText:',error);
-        }
-    }
+	public async addNamedEntityText(
+		label: string,
+		option: string,
+		languages: string[] = ['en'],
+		keywords: string[]
+	) {
+		try {
+			nlp.addNamedEntityText(label, option, languages, keywords);
+			//console.log('addNamedEntityText',label, category, languages, keywords)
+		} catch (error) {
+			console.log('addNamedEntityText:', error);
+		}
+	}
+	public async removeNamedEntityText(
+		label: string,
+		option: string,
+		languages: string[] = ['en'],
+		keywords: string[]
+	) {
+		try {
+			nlp.removeNamedEntityText(label, option, languages, keywords);
+			//console.log('removeNamedEntityText',label, category, languages, keywords)
+		} catch (error) {
+			console.log('addNamedEntityText:', error);
+		}
+	}
 }
 
 const nlpProcessor = new NlpProcessor();

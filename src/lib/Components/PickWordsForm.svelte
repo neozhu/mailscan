@@ -45,18 +45,22 @@
 		words[w] = !words[w];
 		if (words[w]) {
 			selected_words.push(w);
-			if (selected_words.length > 5) {
+			if (selected_words.length > 15) {
 				const removed = selected_words.shift();
 				if (removed) words[removed] = false;
 			}
 		} else {
 			selected_words = selected_words.filter((x) => x != w);
 		}
-		if (selected_words) {
-			record.person_name = selected_words.join(' ');
-			personName = selected_words.join(' ');
+		if (selected_words.length>0) {
+			const [firstname,lastname] = selected_words;
+			//console.log(firstname,lastname);
+			record.person_name = `${firstname??''} ${lastname??''}`.trim();
+			record.extracted_words = selected_words.join(',');
+			personName = `${firstname??''} ${lastname??''}`.trim();;
 		} else {
 			record.person_name = '';
+			record.extracted_words = '';
 			personName = '';
 		}
 		vaildateForm();
@@ -140,6 +144,7 @@
 			}}
 		>
 			<input type="hidden" name="original_text" bind:value={record.original_text} />
+			<input type="hidden" name="extracted_words" bind:value={record.extracted_words} />
 			<input type="hidden" name="elapsed_time" bind:value={record.elapsed_time} />
 			<input type="hidden" name="department" bind:value={record.department} />
 			<input type="hidden" name="lang" bind:value={record.lang} />
@@ -176,6 +181,8 @@
 				<h6 class="h6 my-1.5 mt-5" data-toc-ignore="">
 					<span class="text-error-500">*</span> Please choose the department for {#if personName}
 						<span class="chip variant-filled">{personName}</span>
+						{:else}
+						<span class="chip ">firstName lastName</span>
 					{/if}.
 				</h6>
 				<article class="gap-1 overflow-y-auto focus:overscroll-contain overscroll-auto max-h-28">

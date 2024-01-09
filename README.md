@@ -44,6 +44,15 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
+## Building Image
+```bash
+ docker build -t mailscankit:latest .
+
+
+ docker run -d -p 3000:3000 mailscankit:latest    
+ 
+ ```
+
 
 ### Usage
 1. Open the app in a web browser.

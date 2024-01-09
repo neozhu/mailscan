@@ -1,7 +1,12 @@
 import { COOKIE_OPTIONS, LOGOUT_PATH } from '$lib/constant';
 import { pb } from '$lib/pocketbase';
 import type { Handle } from '@sveltejs/kit';
+import eventsource from 'eventsource'
+ 
 export const handle: Handle = async ({ event, resolve }) => {
+	if (typeof global.EventSource === 'undefined') {
+        global.EventSource = eventsource;
+    }
  	// get cookie from user and set cookie to pocketbase
 	pb.authStore.loadFromCookie(event.request.headers.get('cookie') || '');
 
