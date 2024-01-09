@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import {defaultLanguage} from '$lib/stores/language';
 	import type { SvelteComponent } from 'svelte';
 	import { XCircle, ArrowRight, MailSearch, Trash2 } from 'svelte-lucide';
 	import {
@@ -11,7 +12,11 @@
 		type ToastStore
 	} from '@skeletonlabs/skeleton';
 	import type { NlpEntity } from '$lib/type';
-
+	let languageMap: Record<string, string> = {
+        'en-US': 'en',
+        'de-DE': 'de',
+        'zh-CN': 'zh',
+    };
 	const modalStore: ModalStore = getModalStore();
 	const toastStore: ToastStore = getToastStore();
 	export let parent: SvelteComponent;
@@ -26,9 +31,13 @@
 	}
 	async function removeKeywords(person: NlpEntity) {
 		const formData = new FormData();
+		const lang = languageMap[$defaultLanguage];
+		console.log(lang)
 		formData.append('entity', person.entity);
 		formData.append('option', person.option);
 		formData.append('sourceText', person.sourceText);
+		formData.append('utteranceText', person.utteranceText);
+		formData.append('lang', lang);
 		const response = await fetch('?/removeKeywords', {
 			method: 'POST',
 			body: formData

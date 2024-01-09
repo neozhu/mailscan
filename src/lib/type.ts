@@ -51,4 +51,5 @@ export interface NlpEntity {
 	option: string;
 	sourceText: string;
 	utteranceText: string;
+    lang:string;
 }
