@@ -43,7 +43,7 @@ class TextProcessor {
             data: { text }
         } = await worker.recognize(buffer);
         await worker.terminate();
-        //console.log('txt',text);
+        console.log('recognizeText:',lang,text);
         if(lang=='chi_sim'){
             return text.replace(/\s+/g, '')
         }

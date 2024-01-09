@@ -16,6 +16,15 @@ export interface Person{
         department: Department;
     };
 }
+export interface Entity{
+    id?:string,
+    name:string,
+    lang:string,
+    option:string,
+    keywords:string,
+    owner:string,
+    collectionName:'entity'
+}
 export interface ScanHistory{
     id?:string,
     original_text:string,
@@ -24,6 +33,7 @@ export interface ScanHistory{
     trained:boolean,
     department?:string,
     words:string,
+    extracted_words:string,
     lang:string,
     owner?:string
 }

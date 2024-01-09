@@ -1,16 +1,17 @@
+import eventsource from 'eventsource';
+global.EventSource = eventsource;
 import type { PageServerLoad, Actions } from './$types';
 import { redirect } from '@sveltejs/kit';
 import { NlpManager } from 'node-nlp';
 import { HttpStatusCode } from '$lib/statusCodes';
-import { type ScanHistory, type NlpDocument, type NlpEntity, type Department, type Person } from '$lib/type';
+import { type ScanHistory, type NlpDocument, type NlpEntity, type Department, type Person,type Entity } from '$lib/type';
 import textProcessor from '$lib/helper';
 import nlpProcessor from '$lib/NlpProcessor';
 
 
-
 export const load = (async ({ locals }) => {
 	if (!locals.pb.authStore.isValid) throw redirect(HttpStatusCode.SEE_OTHER, '/login');
-	await nlpProcessor.initial(locals.pb);
+	await nlpProcessor.initial();
 	try {
 		const records: Department[] = await locals.pb.collection('department').getFullList({
 			sort: '-created'
@@ -84,32 +85,36 @@ export const actions: Actions = {
 			trained: boolean,
 			department?: string,
 			words: string,
+			extracted_words:string,
 			lang: string,
 			owner: string
 		};
 		//console.log('department:', data.department);
-		let keywords=data.person_name;
+		let option=data.person_name??'';
 		if(data.lang=='zh' && data.person_name){
-			keywords=data.person_name.replace(/\s+/g, '');
+			option=data.person_name.replace(/\s+/g, '');
 		}
-		const person: Person = {
-			name: keywords ?? '',
-			email: '',
-			phoneNumber: '',
-			department: data.department,
-			owner: locals.user?.id,
-			lang: data.lang
-		}
+		
 		data.owner = locals.user?.id;
+		let label:string=data.department??'';
 		try {
-			const exist: Person = await locals.pb.collection('people').getFirstListItem(`name="${data.person_name}"`);
-			exist.department = data.department;
-			const personerecord = await locals.pb.collection('people').update(exist.id!, exist);
-		} catch {
-			const personerecord = await locals.pb.collection('people').create(person);
+			const department: Department = await locals.pb.collection('department').getOne(data.department!);
+			label=`${department.name} | ${department.address}`;
+			const newEntity: Entity = {
+				id:'',
+				name: label,
+				option:option,
+				keywords:data.extracted_words,
+				owner: locals.user?.id,
+				lang: data.lang
+			}
+			 await locals.pb.collection('entities').create(newEntity);
+			 await locals.pb.collection('scanHistories').create(data); 
+		} catch(error) {
+			 console.log(error);
 		}
-		await nlpProcessor.addNamedEntityText(locals.pb, 'person', data.department ?? '', [data.lang], [data.person_name ?? '']);
-		const historyrecord = await locals.pb.collection('scanHistories').create(data);
+		await nlpProcessor.addNamedEntityText(label, option, [data.lang], [data.person_name ?? '']);
+		
 		//console.log('addScanHistory:', historyrecord);
 	},
 	process: async ({ locals, request }) => {
@@ -136,6 +141,7 @@ export const actions: Actions = {
 					department: '',
 					person_name: '',
 					words: JSON.stringify(tokens),
+					extracted_words:'',
 					elapsed_time: executionTime,
 					trained: false,
 					lang: language,
