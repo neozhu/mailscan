@@ -122,7 +122,7 @@
 			</form>
 
 			<h6 class="h6 my-1.5" data-toc-ignore="">Classification:</h6>
-			<div class="overflow-y-auto focus:overscroll-contain overscroll-auto max-h-40">
+			<div class="overflow-y-auto focus:overscroll-contain overscroll-auto max-h-56">
 				{#each records as item}
 					<button
 						class="chip variant-soft hover:variant-filled mr-1 mb-1"
