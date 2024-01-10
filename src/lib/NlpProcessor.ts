@@ -27,9 +27,25 @@ class NlpProcessor {
 					.filter((x) => x.length > 0);
 				nlp.addNamedEntityText(en.name, en.option, [en.lang], keywords);
 				this.labels.add(en.name);
-				console.log('addNamedEntityText', en.name, en.option, [en.lang], keywords);
+				//console.log('addNamedEntityText', en.name, en.option, [en.lang], keywords);
 			}
-
+			// Subscribing to all changes ('*') on the 'entities' collection in PocketBase.
+			// delte -> removeNamedEntityText
+			// create -> addNamedEntityText
+			pb.collection('entities').subscribe('*', function (e) {
+				if(e.action=='delete'){
+					const del = e.record as unknown as Entity;
+					nlp.removeNamedEntityText(del.name,del.option,[del.lang],del.keywords.split(',').map(x=>x.trim()));
+				}else if(e.action=='create'){
+					const created = e.record as unknown as Entity;
+					nlp.addNamedEntityText(created.name,created.option,[created.lang],created.keywords.split(',').map(x=>x.trim()));
+				}else if(e.action=='update'){
+					const updated = e.record as unknown as Entity;
+					nlp.removeNamedEntityText(updated.name,updated.option,[updated.lang],updated.keywords.split(',').map(x=>x.trim()));
+					nlp.addNamedEntityText(updated.name,updated.option,[updated.lang],updated.keywords.split(',').map(x=>x.trim()));
+				}
+				
+			}, { /* other options like expand, custom headers, etc. */ });
 			this.initialized = true;
 		} catch (error) {
 			console.log('NlpProcessor.initial', error);
