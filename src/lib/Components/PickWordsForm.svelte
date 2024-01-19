@@ -157,7 +157,7 @@
 					<span class="text-error-500">*</span> Please select the words from the list below that are
 					names of people.
 				</h6>
-				<article class="gap-1 overflow-y-auto focus:overscroll-contain overscroll-auto max-h-32">
+				<article class="gap-1 overflow-y-auto focus:overscroll-contain overscroll-auto max-h-60">
 					<div class="flex gap-1 flex-wrap">
 						{#each Object.keys(words) as w}
 							<button
