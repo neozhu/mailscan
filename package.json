@@ -46,6 +46,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@nlpjs/lang-en": "^4.26.1",
     "@sveltejs/adapter-node": "^2.0.2",
+    "cache-manager": "^5.3.2",
     "eventsource": "^2.0.2",
     "natural": "^6.10.4",
     "node-nlp": "^4.27.0",

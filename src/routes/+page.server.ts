@@ -2,22 +2,21 @@ import eventsource from 'eventsource';
 global.EventSource = eventsource;
 import type { PageServerLoad, Actions } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { NlpManager } from 'node-nlp';
 import { HttpStatusCode } from '$lib/statusCodes';
 import {
 	type ScanHistory,
-	type NlpDocument,
 	type NlpEntity,
 	type Department,
-	type Person,
 	type Entity
 } from '$lib/type';
 import textProcessor from '$lib/helper';
 import nlpProcessor from '$lib/NlpProcessor';
+import nlpManagerCache from '$lib/NlpManagerCache';
 
 export const load = (async ({ locals }) => {
 	if (!locals.pb.authStore.isValid) throw redirect(HttpStatusCode.SEE_OTHER, '/login');
-	await nlpProcessor.initial();
+	await nlpProcessor.initial(locals.user?.id);
+    await nlpManagerCache.getOrCreateNlpManager(locals.user?.id);
 	try {
 		const records: Department[] = await locals.pb.collection('department').getFullList({
 			sort: '-created'
@@ -52,6 +51,7 @@ export const actions: Actions = {
 		await locals.pb.collection('department').delete(id!);
 	},
 	removeKeywords: async ({ locals, request }) => {
+		const userId = locals.user?.id;
 		const data: NlpEntity = Object.fromEntries(await request.formData()) as unknown as {
 			start: number;
 			end: number;
@@ -65,12 +65,7 @@ export const actions: Actions = {
 			utteranceText: string;
 			lang: string;
 		};
-		await nlpProcessor.removeNamedEntityText(
-			data.entity,
-			data.option,
-			[data.lang],
-			[data.sourceText]
-		);
+		 
 		try {
 			const {items} = await locals.pb
 				.collection('entities')
@@ -89,28 +84,14 @@ export const actions: Actions = {
 					}
 				}
 			}
+			nlpProcessor.refresh(userId);
 		} catch (error) {
 			console.log('removeKeywords:', error);
 		}
-		//console.log('removeNamedEntityText:', data.entity,data.option,[data.lang],[data.sourceText]);
-		// if (data.option.includes('|')) {
-		// 	const name = data.option.split('|')[0].trim();
-		// 	const address = data.option.split('|')[1].trim();
-		// 	const label='person';
-		// 	try{
-		// 		const record:Department =await locals.pb.collection('department').getFirstListItem(`name="${name}" && address="${address}"`);
-		// 		const result = await locals.pb.collection('people').getList(1,50,{filter:`name="${data.sourceText}" && department="${record.id}"`});
-		// 		result.items.forEach(async (item)=>{
-		// 			const p:Person=item as unknown as Person;
-		// 			await nlpProcessor.removeNamedEntityText(locals.pb,label,record.id,[p.lang??'en'],[p.name])
-		// 			await locals.pb.collection('people').delete(item.id!);
-		// 		});
-		// 	}catch(error){
-		// 		console.log('removeKeywords:',error);
-		// 	}
-		// }
+		 
 	},
 	addScanHistory: async ({ locals, request }) => {
+		const userId = locals.user?.id;
 		const data = Object.fromEntries(await request.formData()) as unknown as {
 			id?: string;
 			original_text: string;
@@ -149,9 +130,10 @@ export const actions: Actions = {
 		} catch (error) {
 			console.log(error);
 		}
-		await nlpProcessor.addNamedEntityText(label, option, [data.lang], [data.person_name ?? '']);
+		nlpProcessor.refresh(userId);
 	},
 	process: async ({ locals, request }) => {
+		const userId=locals.user?.id;
 		const start = performance.now();
 		const data = await request.formData();
 		const defaultLanguage = data.get('lang')?.toString() ?? 'en-US';
@@ -160,7 +142,7 @@ export const actions: Actions = {
 
 		if (file && file instanceof File) {
 			const text = await textProcessor.recognizeText(file, lang);
-			const personEntities: NlpEntity[] = await nlpProcessor.process(text, language);
+			const personEntities: NlpEntity[] = await nlpProcessor.process(userId,text, language);
 
 			if (personEntities && personEntities.length > 0) {
 				const personName = personEntities[0].sourceText;
