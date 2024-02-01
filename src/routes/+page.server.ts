@@ -15,8 +15,10 @@ import nlpManagerCache from '$lib/NlpManagerCache';
 
 export const load = (async ({ locals }) => {
 	if (!locals.pb.authStore.isValid) throw redirect(HttpStatusCode.SEE_OTHER, '/login');
-	await nlpProcessor.initial(locals.user?.id);
+	//await nlpProcessor.initial(locals.user?.id);
+	if(locals.user){
     await nlpManagerCache.getOrCreateNlpManager(locals.user?.id);
+	}
 	try {
 		const records: Department[] = await locals.pb.collection('department').getFullList({
 			sort: '-created'
@@ -72,6 +74,7 @@ export const actions: Actions = {
 				.getList(1, 50, {
 					filter: `name="${data.entity}" && option="${data.option}" && lang="${data.lang}"`
 				});
+			//console.log('removeKeywords,',items)
 			for (const item of items) {
 				const en = item as unknown as Entity;
 				if (en.keywords.length > 0) {
@@ -79,12 +82,14 @@ export const actions: Actions = {
 					en.keywords = keywords.join(',');
 					if (en.keywords.length > 0) {
 						await locals.pb.collection('entities').update(en.id!, en);
+						//console.log('update entities',en)
 					} else {
 						await locals.pb.collection('entities').delete(en.id!);
+						//console.log('delete entities',en.id)
 					}
 				}
 			}
-			nlpProcessor.refresh(userId);
+			await nlpProcessor.refresh(userId);
 		} catch (error) {
 			console.log('removeKeywords:', error);
 		}
@@ -130,7 +135,7 @@ export const actions: Actions = {
 		} catch (error) {
 			console.log(error);
 		}
-		nlpProcessor.refresh(userId);
+		await nlpProcessor.refresh(userId);
 	},
 	process: async ({ locals, request }) => {
 		const userId=locals.user?.id;

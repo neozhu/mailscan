@@ -18,18 +18,16 @@ class NlpManagerCache {
           });
     }
 
-    async getOrCreateNlpManager(userId:string):NlpManager {
+    async getOrCreateNlpManager(userId:string):Promise<NlpManager> {
         const cacheKey = `nlp-manager-${userId}`;
-        let manager = await this.memoryCache.get(cacheKey);
-        
+        let manager = (await this.memoryCache.get(cacheKey))  as NlpManager;
         if (!manager) {
-            manager = this.createNlpManager(userId);
+            manager = await this.createNlpManager(userId);
             await this.memoryCache.set(cacheKey, manager);
         }
         return manager;
     }
-    async createNlpManager(userId:string):NlpManager {
-        console.log('createNlpManager instance:',userId)
+    async createNlpManager(userId:string):Promise<NlpManager> {
         const manager = new NlpManager(this.config);
         const entities: Entity[] = await pb.collection('entities').getFullList({
             sort: '-created',
@@ -45,11 +43,12 @@ class NlpManagerCache {
             names.add(en.name);
         }
         this.Labels.set(userId,[...names]);
+        //console.log('createNlpManager instance:',userId)
         return manager;
     }
-    async refresh(userId:string){
+    async refresh(userId:string):Promise<void>{
         const cacheKey = `nlp-manager-${userId}`;
-        const manager = this.createNlpManager(userId);
+        const manager =await this.createNlpManager(userId);
         await this.memoryCache.set(cacheKey, manager);
     }
 }

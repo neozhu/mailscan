@@ -52,9 +52,9 @@ class NlpProcessor {
 		return filteredResults;
 	}
 
-	public refresh(userId:string) {
+	public async refresh(userId:string): Promise<void> {
 		try {
-			nlpManagerCache.refresh(userId);
+		  await	nlpManagerCache.refresh(userId);
 		} catch (error) {
 			console.log('refresh:', error);
 		}
