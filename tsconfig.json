@@ -10,22 +10,7 @@
 		"moduleResolution": "bundler",
 		"baseUrl": ".",
 		"allowJs": true,
-		"checkJs": true,
-		"paths": {
-			"$routes": [
-				"src/routes"
-			],
-			"$routes/*": [
-				"src/routes/*"
-			],
-			"$components": [
-				"src/lib/Components"
-			],
-			"$components/*": [
-				"src/lib/Components/*"
-			],
-			 
-		}
+		"checkJs": true
 	},
 	"include": [
 		"src/**/*.d.ts",
