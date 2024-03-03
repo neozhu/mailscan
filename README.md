@@ -53,6 +53,17 @@ You can preview the production build with `npm run preview`.
  docker run -d -p 3000:3000 mailscankit:latest    
  
  ```
+## Docker Run
+```bash
+# Docker Pull Command
+docker pull blazordevlab/mailscankit:latest
+
+docker run -d -p 3000:3000 \
+-e BODY_SIZE_LIMIT=5291456 \
+-e PUBLIC_POCKETBASE_URL=http://127.0.0.1:3010 \
+blazordevlab/mailscankit:latest
+ 
+ ```
 
 
 ### Usage
